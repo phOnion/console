@@ -22,29 +22,31 @@ class Application
         }
 
         if (count($argv) === 1 && in_array('--help', $argv, true)) {
+            $console->writeLine('HELP', 'white');
+            $console->writeLine('');
             foreach ($this->router->getAvailableCommands() as $command) {
                 $meta = $this->router->getCommandData($command);
-                $console->write("\tCommand: \t", 'yellow');
-                $console->writeLine($command, 'bold-green');
-                $console->write("\tDescription: \t", 'yellow');
-                $console->writeLine($meta['description'], 'italic-cyan');
-                $console->writeLine('');
+                $console->write("COMMAND \t", 'white');
+                $console->writeLine($command, 'bold-yellow');
+                $console->writeLine("DESCRIPTION", 'white');
+                $console->writeLine("\t" . $meta['description'], 'dark-gray');
                 if (!empty($meta['flags'])) {
-                    $console->writeLine("\tFlags:", 'yellow');
+                    $console->writeLine("FLAGS", 'white');
                     foreach ($meta['flags'] as $flag => $description) {
-                        $console->write("\t\t-$flag", 'bold-green');
-                        $console->writeLine("\t\t" . $description, 'cyan');
-                        $console->writeLine('');
+                        $console->writeLine("\t-$flag", 'dark-gray');
+                        $console->writeLine("\t    " . $description, 'dark-gray');
+
                     }
                 }
                 if (!empty($meta['parameters'])) {
-                    $console->writeLine("\tParameters:", 'yellow');
+                    $console->writeLine("PARAMETERS", 'white');
                     foreach ($meta['parameters'] as $argument => $description) {
-                        $console->write("\t\t--$argument", 'bold-green');
-                        $console->writeLine("\t" . $description, 'cyan');
+                        $console->writeLine("\t--$argument", 'dark-gray');
+                        $console->writeLine("\t    " . $description, 'dark-gray');
                         $console->writeLine('');
                     }
                 }
+                $console->writeLine(PHP_EOL);
             }
 
             return 0;
