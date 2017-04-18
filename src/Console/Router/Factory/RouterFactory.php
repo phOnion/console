@@ -22,7 +22,7 @@ class RouterFactory implements FactoryInterface
      */
     public function build(Container $container): Router
     {
-        $commands = $container->get('routes');
+        $commands = $container->get('commands');
         $router = new Router(
             $container->get(ArgumentParserInterface::class)
         );
