@@ -2,6 +2,7 @@
 
 namespace Onion\Console\Router\Factory;
 
+use Onion\Framework\Console\Interfaces\ArgumentParserInterface;
 use Onion\Framework\Dependency\Interfaces\FactoryInterface;
 use Onion\Console\Router\Router;
 use Psr\Container\ContainerInterface as Container;
@@ -22,7 +23,9 @@ class RouterFactory implements FactoryInterface
     public function build(Container $container): Router
     {
         $commands = $container->get('routes');
-        $router = new Router();
+        $router = new Router(
+            $container->get(ArgumentParserInterface::class)
+        );
         foreach ($commands as $command) {
             $command = array_merge([
                 'flags' => [],

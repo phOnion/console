@@ -2,6 +2,7 @@
 
 namespace Onion\Console\Router;
 
+use Onion\Framework\Console\Interfaces\ArgumentParserInterface;
 use Onion\Framework\Console\Interfaces\CommandInterface;
 
 class Router
@@ -16,30 +17,28 @@ class Router
      */
     private $handlers;
 
+    private $argumentParser;
+    public function __construct(ArgumentParserInterface $argumentParser)
+    {
+        $this->argumentParser = $argumentParser;
+    }
+
     public function addCommand(string $name, CommandInterface $command, array $data = [])
     {
         $this->commands[$name] = $data;
         $this->handlers[$name] = $command;
     }
 
-    public function match(string $command): array
+    public function match(string $command, array $arguments = []): array
     {
         if (!isset($this->handlers[$command])) {
             throw new \RuntimeException("Command '$command' not found");
         }
 
         $flags = array_keys($this->commands[$command]['flags']);
-        $arguments = array_keys($this->commands[$command]['arguments']);
+        $params = array_keys($this->commands[$command]['arguments']);
 
-        /*
-         * Flags and arguments should use the notation:
-         *  + !flag - For required flag - !o
-         *  + ?flag - For optional flag - ?v
-         *  + !argument - For required argument - !output
-         *  + ?argument - For optional argument - ?verbose
-         */
-
-        $options = [];
+        $options = $this->argumentParser->parse($arguments, $flags, $params);
 
         return [$this->handlers[$command], $options];
     }
