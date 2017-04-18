@@ -29,7 +29,7 @@ class RouterFactory implements FactoryInterface
         foreach ($commands as $command) {
             $command = array_merge([
                 'flags' => [],
-                'arguments' => [],
+                'parameters' => [],
             ], $command);
 
             $name = $command['name'];

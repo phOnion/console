@@ -46,7 +46,7 @@ class Router
         }
 
         $flags = array_keys($this->commands[$command]['flags']);
-        $params = array_keys($this->commands[$command]['arguments']);
+        $params = array_keys($this->commands[$command]['parameters']);
 
         $options = $this->argumentParser->parse($arguments, $flags, $params);
 

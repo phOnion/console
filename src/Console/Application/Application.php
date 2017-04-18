@@ -29,17 +29,21 @@ class Application
                 $console->write("\tDescription: \t", 'yellow');
                 $console->writeLine($meta['description'], 'italic-cyan');
                 $console->writeLine('');
-                $console->writeLine("\tFlags:", 'yellow');
-                foreach ($meta['flags'] as $flag => $description) {
-                    $console->write("\t\t-$flag", 'bold-green');
-                    $console->writeLine("\t\t" . $description, 'cyan');
-                    $console->writeLine('');
+                if (!empty($meta['flags'])) {
+                    $console->writeLine("\tFlags:", 'yellow');
+                    foreach ($meta['flags'] as $flag => $description) {
+                        $console->write("\t\t-$flag", 'bold-green');
+                        $console->writeLine("\t\t" . $description, 'cyan');
+                        $console->writeLine('');
+                    }
                 }
-                $console->writeLine("\tParameters:", 'yellow');
-                foreach ($meta['arguments'] as $argument => $description) {
-                    $console->write("\t\t--$argument", 'bold-green');
-                    $console->writeLine("\t" . $description, 'cyan');
-                    $console->writeLine('');
+                if (!empty($meta['parameters'])) {
+                    $console->writeLine("\tParameters:", 'yellow');
+                    foreach ($meta['parameters'] as $argument => $description) {
+                        $console->write("\t\t--$argument", 'bold-green');
+                        $console->writeLine("\t" . $description, 'cyan');
+                        $console->writeLine('');
+                    }
                 }
             }
 
