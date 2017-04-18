@@ -23,6 +23,16 @@ class Router
         $this->argumentParser = $argumentParser;
     }
 
+    public function getAvailableCommands(): array
+    {
+        return array_keys($this->handlers);
+    }
+
+    public function getCommandData(string $command): array
+    {
+        return $this->commands[$command];
+    }
+
     public function addCommand(string $name, CommandInterface $command, array $data = [])
     {
         $this->commands[$name] = $data;
