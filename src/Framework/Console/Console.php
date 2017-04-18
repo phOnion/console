@@ -15,7 +15,7 @@ class Console implements ConsoleInterface
         $this->pointer = fopen($pointer, 'a+b');
     }
 
-    public function withArgument(string $argument, string $value): ConsoleInterface
+    public function withArgument(string $argument, $value): ConsoleInterface
     {
         $self = clone $this;
         $self->arguments[$argument] = $value;
@@ -41,7 +41,7 @@ class Console implements ConsoleInterface
         return isset($this->arguments[$argument]);
     }
 
-    public function getArgument(string $argument, string $default = null)
+    public function getArgument(string $argument, $default = null)
     {
         return $this->arguments[$argument] ?? $default;
     }

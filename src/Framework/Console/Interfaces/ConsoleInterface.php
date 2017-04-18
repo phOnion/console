@@ -64,10 +64,10 @@ interface ConsoleInterface
     const PROMPT_YES = 'y';
     const PROMPT_NO  = 'n';
 
-    public function withArgument(string $argument, string $value): ConsoleInterface;
+    public function withArgument(string $argument, $value): ConsoleInterface;
     public function withoutArgument(string $argument): ConsoleInterface;
     public function hasArgument(string $argument): bool;
-    public function getArgument(string $argument, string $default = null);
+    public function getArgument(string $argument, $default = null);
 
     public function block(
         string $message,
