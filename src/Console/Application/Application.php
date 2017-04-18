@@ -2,6 +2,7 @@
 
 namespace Onion\Console\Application;
 
+use Onion\Framework\Console\Interfaces\CommandInterface;
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
 use Onion\Console\Router\Router;
 
@@ -31,16 +32,22 @@ class Application
             return 0;
         }
 
-        if (count($argv) === 2 && $argv[1] === '--help') {
-            if (in_array($argv[0], $this->router->getAvailableCommands(), true)) {
-                $console->writeLine('HELP', 'white');
-                $console->writeLine('');
-                $this->displayHelpInfo($console, $argv[0]);
+        if (
+            count($argv) === 2 &&
+            $argv[1] === '--help' &&
+            in_array($argv[0], $this->router->getAvailableCommands(), true)
+        ) {
+            $console->writeLine('HELP', 'white');
+            $console->writeLine('');
+            $this->displayHelpInfo($console, $argv[0]);
 
-                return 0;
-            }
+            return 0;
         }
 
+        /**
+         * @var $command CommandInterface
+         * @var $arguments array
+         */
         list($command, $arguments)=$this->router->match((string) $argv[0], $argv);
         foreach ($arguments as $name => $value) {
             $console = $console->withArgument($name, $value);
@@ -51,13 +58,16 @@ class Application
 
     private function displayHelpInfo(ConsoleInterface $console, string $command)
     {
+        /**
+         * @var $meta array[]
+         */
         $meta = $this->router->getCommandData($command);
         $console->write("COMMAND \t", 'white');
         $console->writeLine($command, 'bold-yellow');
-        $console->writeLine("DESCRIPTION", 'white');
+        $console->writeLine('DESCRIPTION', 'white');
         $console->writeLine("\t" . $meta['description'], 'dark-gray');
         if (!empty($meta['flags'])) {
-            $console->writeLine("FLAGS", 'white');
+            $console->writeLine('FLAGS', 'white');
             foreach ($meta['flags'] as $flag => $description) {
                 $console->writeLine("\t-$flag", 'dark-gray');
                 $console->writeLine("\t    " . $description, 'dark-gray');
@@ -65,7 +75,7 @@ class Application
             }
         }
         if (!empty($meta['parameters'])) {
-            $console->writeLine("PARAMETERS", 'white');
+            $console->writeLine('PARAMETERS', 'white');
             foreach ($meta['parameters'] as $argument => $description) {
                 $console->writeLine("\t--$argument", 'dark-gray');
                 $console->writeLine("\t    " . $description, 'dark-gray');
