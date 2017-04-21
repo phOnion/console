@@ -78,7 +78,7 @@ class Application
             foreach ($meta['flags'] as $flag => $description) {
                 $console->writeLine("\t-$flag", 'dark-gray');
                 $console->writeLine("\t    " . $description, 'dark-gray');
-
+                $console->writeLine('');
             }
         }
         if (!empty($meta['parameters'])) {
