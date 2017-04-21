@@ -87,8 +87,13 @@ class Console implements ConsoleInterface
 
     public function prompt(string $message, string $textColor = 'none', string $backgroundColor = 'none'): string
     {
-        $this->write($message . ': ', $textColor, $backgroundColor);
-        return readline();
+        return readline(sprintf(
+            "%s%s:%s %s",
+            self::BACKGROUND_COLORS[$backgroundColor],
+            self::TEXT_COLORS[$textColor],
+            $message,
+            self::COLOR_TERMINATOR
+        ));
     }
 
     public function choice(
