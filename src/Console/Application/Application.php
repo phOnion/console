@@ -66,6 +66,13 @@ class Application
         $console->writeLine($command, 'bold-yellow');
         $console->writeLine('DESCRIPTION', 'white');
         $console->writeLine("\t" . $meta['description'], 'dark-gray');
+        $console->writeLine('OPTIONS', 'white');
+        $console->writeLine("\t" . implode(' ',
+            array_merge(
+                array_map(function ($value) {return '[-' . $value . ']';}, array_keys($meta['flags'])),
+                array_map(function ($value) {return '[--' . $value . ']';}, array_keys($meta['parameters']))
+            )), 'dark-gray'
+        );
         if (!empty($meta['flags'])) {
             $console->writeLine('FLAGS', 'white');
             foreach ($meta['flags'] as $flag => $description) {
