@@ -67,7 +67,13 @@ class Application
         $console->writeLine('DESCRIPTION', 'white');
         $console->writeLine("\t" . $meta['description'], 'dark-gray');
         $console->writeLine('OPTIONS', 'white');
-        $console->writeLine("\t" . implode(' ',
+
+        $extra = '';
+        if ($meta['extra'] !== null) {
+            $extra = '<' . $meta['extra'] . '> ';
+        }
+
+        $console->writeLine("\t" . $extra.implode(' ',
             array_merge(
                 array_map(function ($value) {return '[-' . $value . ']';}, array_keys($meta['flags'])),
                 array_map(function ($value) {return '[--' . $value . ']';}, array_keys($meta['parameters']))
