@@ -53,7 +53,7 @@ class Router
         $params = array_keys($this->commands[$command]['parameters']);
 
         $options = $this->argumentParser->parse($arguments, $flags, $params);
-        if ($this->commands[$command]['extra'] !== null) {
+        if ($this->commands[$command]['extra'] !== null && strpos($arguments[1] ?? '', '-') !== 0) {
             $options[$this->commands[$command]['extra']] = $arguments[1] ?? null;
         }
 
