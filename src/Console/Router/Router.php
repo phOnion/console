@@ -54,7 +54,7 @@ class Router
 
         $options = $this->argumentParser->parse($arguments, $flags, $params);
         if ($this->commands[$command]['extra'] !== null) {
-            $options[$this->commands[$command]['extra']] = $arguments[1];
+            $options[$this->commands[$command]['extra']] = $arguments[1] ?? null;
         }
 
         return [$this->handlers[$command], $options];
