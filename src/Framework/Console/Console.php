@@ -85,15 +85,28 @@ class Console implements ConsoleInterface
             ) . PHP_EOL);
     }
 
-    public function prompt(string $message, string $textColor = 'none', string $backgroundColor = 'none'): string
+    public function prompt(string $message, bool $protected = false, string $textColor = 'none', string $backgroundColor = 'none'): string
     {
-        return readline(sprintf(
-            "%s%s:%s %s",
-            self::BACKGROUND_COLORS[$backgroundColor],
-            self::TEXT_COLORS[$textColor],
-            $message,
-            self::COLOR_TERMINATOR
-        ));
+        $this->write(sprintg('%s: ', $message), $textColor, $backgroundColor);
+
+
+        if ($protected) {
+            if (!stripos(PHP_OS, 'win')) {
+                system('stty -echo');
+            }
+        }
+        $result = trim(fgets(STDIN));
+
+
+
+        if ($protected) {
+            if (!stripos(PHP_OS, 'win')) {
+                system('stty echo');
+                $this->writeLine('');
+            }
+        }
+
+        return $result;
     }
 
     public function choice(
@@ -110,6 +123,7 @@ class Console implements ConsoleInterface
                 self::PROMPT_YES,
                 self::PROMPT_NO,
             ])) . ']',
+            false,
             $textColor,
             $backgroundColor
         );
