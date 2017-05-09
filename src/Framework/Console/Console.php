@@ -116,20 +116,18 @@ class Console implements ConsoleInterface
         string $textColor = 'none',
         string $backgroundColor = 'none'
     ): bool {
-        $response = $this->prompt(
-            $message . ' [' . implode('/', array_map(function ($value) use ($default) {
+        $this->writeLine($message . implode('/', array_map(function ($value) use ($default) {
                 return $value === $default ? strtoupper($value) : $value;
             }, [
                 self::PROMPT_YES,
                 self::PROMPT_NO,
             ])) . ']',
-            false,
             $textColor,
-            $backgroundColor
-        );
+            $backgroundColor);
 
+        $response = strtolower(trim(fgetc(STDIN)));
         return (
-            strtolower($response)[0] === $truth || (empty($response) && $default === $truth)
+            $response === $truth || (empty($response) && $default === $truth)
         );
     }
 }
