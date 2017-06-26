@@ -77,7 +77,8 @@ interface ConsoleInterface
     ): int;
     public function write(string $message, string $textColor = 'none', string $backgroundColor = 'none'): int;
     public function writeLine(string $message, string $textColor = 'none', string $backgroundColor = 'none'): int;
-    public function prompt(string $message, bool $protected = false, string $textColor = 'none', string $backgroundColor = 'none'): string;
+    public function password(string $message, string $textColor = 'none', string $backgroundColor = 'none'): string;
+    public function prompt(string $message, string $textColor = 'none', string $backgroundColor = 'none'): string;
     public function choice(
         string $message,
         string $default = 'n',
