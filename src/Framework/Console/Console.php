@@ -87,28 +87,27 @@ class Console implements ConsoleInterface
 
     public function password(string $message, string $textColor = 'none', string $backgroundColor = 'none'): string
     {
-
-    }
-
-    public function prompt(string $message, bool $protected = false, string $textColor = 'none', string $backgroundColor = 'none'): string
-    {
         $this->write(sprintf('%s: ', $message), $textColor, $backgroundColor);
-
-        if ($protected) {
-            if (!stripos(PHP_OS, 'win')) {
-                system('stty -echo');
+        if (!stripos(PHP_OS, 'win')) {
+            system('stty -echo');
+            $result = trim(fgets(STDIN));
+            system('stty echo');
+        } else {
+            $location = sys_get_temp_dir() . '/hiddeninput.exe';
+            if (!file_exists($location)) {
+                $fp = fopen($location, 'wb');
+                stream_copy_to_stream(fopen('https://github.com/Seldaek/hidden-input/blob/master/build/hiddeninput.exe?raw=true', 'rb'), $fp);
             }
-        }
-        $result = trim(fgets(STDIN));
-
-        if ($protected) {
-            if (!stripos(PHP_OS, 'win')) {
-                system('stty echo');
-                $this->writeLine('');
-            }
+            $result = exec($location) ;
         }
 
         return $result;
+    }
+
+    public function prompt(string $message, string $textColor = 'none', string $backgroundColor = 'none'): string
+    {
+        $this->write(sprintf('%s: ', $message), $textColor, $backgroundColor);
+        return trim(fgets(STDIN));
     }
 
     public function choice(

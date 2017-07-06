@@ -69,7 +69,7 @@ class Application
         $console->writeLine('OPTIONS', 'white');
 
         $extra = '';
-        if ($meta['extra'] !== null) {
+        if ($meta['extra'] !== '') {
             $extra = '<' . $meta['extra'] . '> ';
         }
 
