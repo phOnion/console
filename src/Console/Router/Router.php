@@ -63,9 +63,6 @@ class Router
             }
         }
 
-        var_dump($options);
-        exit;
-
         return [$this->handlers[$command], $options];
     }
 }
