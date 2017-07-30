@@ -70,7 +70,7 @@ class Application
 
         $extra = '';
         if ($meta['extra'] !== '') {
-            $extra = '<' . $meta['extra'] . '> ';
+            $extra = implode(' ', array_map(function ($param) { return '<' . $param . '>'; }, $meta['extra'])) . ' ';
         }
 
         $console->writeLine("\t" . $extra.implode(' ',
