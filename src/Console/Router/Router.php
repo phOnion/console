@@ -35,11 +35,15 @@ class Router
 
     public function addCommand(string $name, CommandInterface $command, array $data = [])
     {
-        $param = null;
+        $params = [];
         if (strpos($name,' ') !== false) {
-            list($name, $param)=explode(' ', $name, 2);
+            list($name, $extra)=explode(' ', $name, 2);
+            $params = explode(' ', $extra);
         }
-        $this->commands[$name] = array_merge($data, ['extra' => trim($param ?? '', '[]')]);
+
+        $this->commands[$name] = array_merge($data, ['extra' => array_map(function ($param) {
+            return trim($param, '[]');
+        }, $params)]);
         $this->handlers[$name] = $command;
     }
 
@@ -54,8 +58,13 @@ class Router
 
         $options = $this->argumentParser->parse($arguments, $flags, $params);
         if ($this->commands[$command]['extra'] !== null && strpos($arguments[1] ?? '', '-') !== 0) {
-            $options[$this->commands[$command]['extra']] = $arguments[1] ?? null;
+            foreach ($this->commands[$command]['extra'] as $param) {
+                $options[$param] = $arguments[array_search($param, $this->commands[$command]['extra'])+1] ?? null;
+            }
         }
+
+        var_dump($options);
+        exit;
 
         return [$this->handlers[$command], $options];
     }
