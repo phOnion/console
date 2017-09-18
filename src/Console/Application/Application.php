@@ -17,13 +17,13 @@ class Application
     public function run(array $argv, ConsoleInterface $console): int
     {
         if (!isset($argv[0])) {
-            $console->writeLine('No command provided', 'red');
-            $console->writeLine('Try with --help to see list of available commands', 'cyan');
+            $console->writeLine('%textColor:red%No command provided');
+            $console->writeLine('%textColor:cyan%Try with --help to see list of available commands');
             return 1;
         }
 
         if (count($argv) === 1 && $argv[0] === '--help') {
-            $console->writeLine('HELP', 'white');
+            $console->writeLine('%textColor:white%HELP');
             $console->writeLine('');
             foreach ($this->router->getAvailableCommands() as $command) {
                 $this->displayHelpInfo($console, $command);
@@ -37,7 +37,7 @@ class Application
             $argv[1] === '--help' &&
             in_array($argv[0], $this->router->getAvailableCommands(), true)
         ) {
-            $console->writeLine('HELP', 'white');
+            $console->writeLine('%textColor:white%HELP');
             $console->writeLine('');
             $this->displayHelpInfo($console, $argv[0]);
 
@@ -62,36 +62,36 @@ class Application
          * @var $meta array[]
          */
         $meta = $this->router->getCommandData($command);
-        $console->write("COMMAND \t", 'white');
-        $console->writeLine($command, 'bold-yellow');
-        $console->writeLine('DESCRIPTION', 'white');
-        $console->writeLine("\t" . $meta['description'], 'dark-gray');
-        $console->writeLine('OPTIONS', 'white');
+        $console->write("%textColor:white%COMMAND \t");
+        $console->writeLine("%textColor:bold-yellow%$command");
+        $console->writeLine('%textColor:white%DESCRIPTION');
+        $console->writeLine("\t%textColor:dark-gray%" . $meta['description']);
+        $console->writeLine('%textColor:white%OPTIONS');
 
         $extra = '';
         if ($meta['extra'] !== '') {
             $extra = implode(' ', array_map(function ($param) { return '<' . $param . '>'; }, $meta['extra'])) . ' ';
         }
 
-        $console->writeLine("\t" . $extra.implode(' ',
+        $console->writeLine("\t%textColor:dark-gray%" . $extra.implode(' ',
             array_merge(
                 array_map(function ($value) {return '[-' . $value . ']';}, array_keys($meta['flags'])),
                 array_map(function ($value) {return '[--' . $value . ']';}, array_keys($meta['parameters']))
-            )), 'dark-gray'
+            ))
         );
         if (!empty($meta['flags'])) {
-            $console->writeLine('FLAGS', 'white');
+            $console->writeLine('%textColor:white%FLAGS');
             foreach ($meta['flags'] as $flag => $description) {
-                $console->writeLine("\t-$flag", 'dark-gray');
-                $console->writeLine("\t    " . $description, 'dark-gray');
+                $console->writeLine("\t%textColor:dark-gray%-$flag");
+                $console->writeLine("\t%textColor:dark-gray%    " . $description);
                 $console->writeLine('');
             }
         }
         if (!empty($meta['parameters'])) {
-            $console->writeLine('PARAMETERS', 'white');
+            $console->writeLine('%textColor:white%PARAMETERS');
             foreach ($meta['parameters'] as $argument => $description) {
-                $console->writeLine("\t--$argument", 'dark-gray');
-                $console->writeLine("\t    " . $description, 'dark-gray');
+                $console->writeLine("\t%textColor:dark-gray%--$argument");
+                $console->writeLine("\t%textColor:dark-gray%    " . $description);
                 $console->writeLine('');
             }
         }
