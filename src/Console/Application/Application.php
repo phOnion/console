@@ -72,7 +72,7 @@ class Application
             $extra = implode(' ', array_map(function ($param) { return '<' . $param . '>'; }, $meta['extra'])) . ' ';
         }
 
-        if ($extra !== '' && !empty($meta['flags']) && !empty($meta['parameters'])) {
+        if ($extra !== '' || !empty($meta['flags']) || !empty($meta['parameters'])) {
             $console->writeLine("\t%textColor:dark-gray%" . $extra . implode(' ',
                     array_merge(
                         array_map(function ($value) {
