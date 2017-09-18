@@ -66,33 +66,38 @@ class Application
         $console->writeLine("%textColor:bold-yellow%$command");
         $console->writeLine('%textColor:white%DESCRIPTION');
         $console->writeLine("\t%textColor:dark-gray%" . $meta['description']);
-        $console->writeLine('%textColor:white%OPTIONS');
 
         $extra = '';
         if ($meta['extra'] !== '') {
             $extra = implode(' ', array_map(function ($param) { return '<' . $param . '>'; }, $meta['extra'])) . ' ';
         }
 
-        $console->writeLine("\t%textColor:dark-gray%" . $extra.implode(' ',
-            array_merge(
-                array_map(function ($value) {return '[-' . $value . ']';}, array_keys($meta['flags'])),
-                array_map(function ($value) {return '[--' . $value . ']';}, array_keys($meta['parameters']))
-            ))
-        );
-        if (!empty($meta['flags'])) {
-            $console->writeLine('%textColor:white%FLAGS');
-            foreach ($meta['flags'] as $flag => $description) {
-                $console->writeLine("\t%textColor:dark-gray%-$flag");
-                $console->writeLine("\t%textColor:dark-gray%    " . $description);
-                $console->writeLine('');
+        if ($extra !== '' && !empty($meta['flags']) && !empty($meta['parameters'])) {
+            $console->writeLine("\t%textColor:dark-gray%" . $extra . implode(' ',
+                    array_merge(
+                        array_map(function ($value) {
+                            return '[-' . $value . ']';
+                        }, array_keys($meta['flags'])),
+                        array_map(function ($value) {
+                            return '[--' . $value . ']';
+                        }, array_keys($meta['parameters']))
+                    ))
+            );
+            if (!empty($meta['flags'])) {
+                $console->writeLine('%textColor:white%FLAGS');
+                foreach ($meta['flags'] as $flag => $description) {
+                    $console->writeLine("\t%textColor:dark-gray%-$flag");
+                    $console->writeLine("\t%textColor:dark-gray%    " . $description);
+                    $console->writeLine('');
+                }
             }
-        }
-        if (!empty($meta['parameters'])) {
-            $console->writeLine('%textColor:white%PARAMETERS');
-            foreach ($meta['parameters'] as $argument => $description) {
-                $console->writeLine("\t%textColor:dark-gray%--$argument");
-                $console->writeLine("\t%textColor:dark-gray%    " . $description);
-                $console->writeLine('');
+            if (!empty($meta['parameters'])) {
+                $console->writeLine('%textColor:white%PARAMETERS');
+                foreach ($meta['parameters'] as $argument => $description) {
+                    $console->writeLine("\t%textColor:dark-gray%--$argument");
+                    $console->writeLine("\t%textColor:dark-gray%    " . $description);
+                    $console->writeLine('');
+                }
             }
         }
         $console->writeLine(PHP_EOL);
