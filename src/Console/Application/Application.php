@@ -62,27 +62,26 @@ class Application
          * @var $meta array[]
          */
         $meta = $this->router->getCommandData($command);
-        $console->write("%textColor:white%COMMAND \t");
-        $console->writeLine("%textColor:bold-yellow%$command");
-        $console->writeLine('%textColor:white%DESCRIPTION');
-        $console->writeLine("\t%textColor:dark-gray%" . $meta['description']);
-
         $extra = '';
         if ($meta['extra'] !== '') {
             $extra = implode(' ', array_map(function ($param) { return '<' . $param . '>'; }, $meta['extra'])) . ' ';
         }
+        $console->write("%textColor:white%COMMAND \t");
+        $console->writeLine("%textColor:bold-yellow%$command%textColor:dark-gray% $extra" . implode(' ',
+                array_merge(
+                    array_map(function ($value) {
+                        return '[-' . $value . ']';
+                    }, array_keys($meta['flags'])),
+                    array_map(function ($value) {
+                        return '[--' . $value . ']';
+                    }, array_keys($meta['parameters']))
+                )));
+        $console->writeLine('%textColor:white%DESCRIPTION');
+        $console->writeLine("\t%textColor:dark-gray%" . $meta['description']);
+
+
 
         if ($extra !== '' || !empty($meta['flags']) || !empty($meta['parameters'])) {
-            $console->writeLine("\t%textColor:dark-gray%" . $extra . implode(' ',
-                    array_merge(
-                        array_map(function ($value) {
-                            return '[-' . $value . ']';
-                        }, array_keys($meta['flags'])),
-                        array_map(function ($value) {
-                            return '[--' . $value . ']';
-                        }, array_keys($meta['parameters']))
-                    ))
-            );
             if (!empty($meta['flags'])) {
                 $console->writeLine('%textColor:white%FLAGS');
                 foreach ($meta['flags'] as $flag => $description) {
