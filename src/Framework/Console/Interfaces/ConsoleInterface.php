@@ -4,7 +4,7 @@ namespace Onion\Framework\Console\Interfaces;
 
 interface ConsoleInterface
 {
-    const COLOR_TERMINATOR = "\033[0m";
+    const COLOR_TERMINATOR = "\33[0m";
     const TEXT_COLORS = [
         'none'  =>          '',
         'white' =>          "\33[1;37m",
@@ -71,19 +71,15 @@ interface ConsoleInterface
 
     public function block(
         string $message,
-        int $width,
-        string $backgroundColor = 'none',
-        string $textColor = 'none'
+        int $width
     ): int;
-    public function write(string $message, string $textColor = 'none', string $backgroundColor = 'none'): int;
-    public function writeLine(string $message, string $textColor = 'none', string $backgroundColor = 'none'): int;
-    public function password(string $message, string $textColor = 'none', string $backgroundColor = 'none'): string;
-    public function prompt(string $message, string $textColor = 'none', string $backgroundColor = 'none'): string;
+    public function write(string $message): int;
+    public function writeLine(string $message): int;
+    public function password(string $message): string;
+    public function prompt(string $message): string;
+    public function confirm(string $message): bool;
     public function choice(
         string $message,
-        string $default = 'n',
-        string $truth = 'y',
-        string $textColor = 'none',
-        string $backgroundColor = 'none'
-    ): bool;
+        array $options
+    ): string;
 }

@@ -3,16 +3,24 @@
 namespace Onion\Framework\Console;
 
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
+use Onion\Framework\Console\Interfaces\BufferInterface;
 
 class Console implements ConsoleInterface
 {
-    private $pointer;
-    private $flags = [];
+    private $buffer;
+    private $autoFlush = true;
+
     private $arguments = [];
 
-    public function __construct(string $pointer)
+    public function __construct(BufferInterface $buffer, bool $autoFlush = true)
     {
-        $this->pointer = fopen($pointer, 'a+b');
+        $this->buffer = $buffer;
+        $this->autoFlush = $autoFlush;
+    }
+
+    public function getBuffer(): BufferInterface
+    {
+        return $this->buffer;
     }
 
     public function withArgument(string $argument, $value): ConsoleInterface
@@ -48,87 +56,115 @@ class Console implements ConsoleInterface
 
     public function block(
         string $message,
-        int $width = 60,
-        string $textColor = 'none',
-        string $backgroundColor = 'none'
+        int $width = 60
     ): int {
         $bytes = 0;
 
-        $this->writeLine(' '. str_pad(' ', $width, ' ') . ' ', $textColor, $backgroundColor);
-        foreach (str_split($message, $width) as $line) {
-            $bytes += $this->writeLine(' '.str_pad($line, $width, ' ') . ' ', $textColor, $backgroundColor);
+        $this->writeLine('');
+        foreach (str_split($this->normalizeText($message), $width) as $line) {
+            $bytes += $this->writeLine(' '.str_pad(trim($line), $width, ' ', STR_PAD_RIGHT) . ' ');
         }
-        $this->writeLine(' '. str_pad(' ', $width, ' ') . ' ', $textColor, $backgroundColor);
+        $this->writeLine('');
 
         return $bytes;
     }
 
-    public function write(string $message, string $textColor = 'none', string $backgroundColor = 'none'): int
+    public function write(string $message): int
     {
-        return (int) fwrite($this->pointer, sprintf(
-            "%s%s%s%s",
-            self::BACKGROUND_COLORS[$backgroundColor],
-            self::TEXT_COLORS[$textColor],
-            $message,
-            self::COLOR_TERMINATOR
-        ));
+        $message = $this->normalizeText("$message");
+        $this->buffer->write("$message");
+
+        if ($this->autoFlush) {
+            $this->buffer->flush();
+        }
+
+        return strlen(preg_replace("#(\033\[[0-9;0-9]*m)#i", '', $message));
     }
 
-    public function writeLine(string $message, string $textColor = 'none', string $backgroundColor = 'none'): int
+    public function writeLine(string $message): int
     {
-        return (int) fwrite($this->pointer, sprintf(
-                "%s%s%s%s",
-                self::BACKGROUND_COLORS[$backgroundColor],
-                self::TEXT_COLORS[$textColor],
-                $message,
-                self::COLOR_TERMINATOR
-            ) . PHP_EOL);
+        return (int) $this->write($message . PHP_EOL);
     }
 
-    public function password(string $message, string $textColor = 'none', string $backgroundColor = 'none'): string
+    public function password(string $message): string
     {
-        $this->write(sprintf('%s: ', $message), $textColor, $backgroundColor);
-        if (!stripos(PHP_OS, 'win')) {
+        $this->write(sprintf('%s: ', $message));
+        $this->buffer->flush();
+        if (stripos(PHP_OS, 'win') === false) {
             system('stty -echo');
             $result = trim(fgets(STDIN));
             system('stty echo');
         } else {
             $location = sys_get_temp_dir() . '/hiddeninput.exe';
             if (!file_exists($location)) {
+                $this->writeLine('Downloading password polyfill');
                 $fp = fopen($location, 'wb');
-                stream_copy_to_stream(fopen('https://github.com/Seldaek/hidden-input/blob/master/build/hiddeninput.exe?raw=true', 'rb'), $fp);
+                $dest = fopen('https://github.com/Seldaek/hidden-input/blob/master/build/hiddeninput.exe?raw=true', 'rb');
+                stream_copy_to_stream($dest, $fp);
+                fclose($dest);
             }
             $result = exec($location) ;
+            $this->writeLine('');
         }
 
         return $result;
     }
 
-    public function prompt(string $message, string $textColor = 'none', string $backgroundColor = 'none'): string
+    public function prompt(string $message): string
     {
-        $this->write(sprintf('%s: ', $message), $textColor, $backgroundColor);
-        return trim(fgets(STDIN));
+        $this->write("$message: ");
+        return trim((string) fgets(STDIN));
+    }
+
+    public function confirm(
+        string $message
+    ): bool {
+        $response = $this->choice($message, ['y', 'n']);
+
+        return (strtolower($response) === 'y');
     }
 
     public function choice(
         string $message,
-        string $default = 'n',
-        string $truth = 'y',
-        string $textColor = 'none',
-        string $backgroundColor = 'none'
-    ): bool {
-        $this->writeLine($message . implode('/', array_map(function ($value) use ($default) {
-                return $value === $default ? strtoupper($value) : $value;
-            }, [
-                self::PROMPT_YES,
-                self::PROMPT_NO,
-            ])) . ']',
-            $textColor,
-            $backgroundColor);
+        array $options
+    ): string
+    {
+        $response = $this->prompt(
+            $message . '['. implode(', ', array_map('strtolower', $options)) . ']'
+        );
 
-        $response = strtolower(trim(fgetc(STDIN)));
-        return (
-            $response === $truth || (empty($response) && $default === $truth)
+        if (!in_array($response, $options)) {
+            $response = $this->choice($message, $options);
+        }
+
+        return $response;
+    }
+
+    public function normalizeText(string $message): string
+    {
+        $terminator = '';
+
+        if (strpos($message, '%textColor') !== false) {
+            preg_match_all('#%textColor:(\w+)%#i', $message, $matches);
+            $message = strtr($message, array_combine($matches[0], array_map(function ($value) {
+                return self::TEXT_COLORS[$value];
+            }, $matches[1])));
+        }
+
+        if (strpos($message, '%bgColor') !== false) {
+            preg_match_all('#%bgColor:(\w+)%#i', $message, $matches);
+            $message = strtr($message, array_combine($matches[0], array_map(function ($value) {
+                return self::BACKGROUND_COLORS[$value];
+            }, $matches[1])));
+        }
+
+        if (strpos($message, '%end%') !== false) {
+            $terminator = self::COLOR_TERMINATOR;
+        }
+
+        return strtr(
+            "$message%end%",
+            ['%end%' => $terminator]
         );
     }
 }
