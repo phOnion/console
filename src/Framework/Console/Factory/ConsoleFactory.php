@@ -2,6 +2,7 @@
 
 namespace Onion\Framework\Console\Factory;
 
+use Onion\Framework\Console\Buffer;
 use Onion\Framework\Console\Console;
 use Onion\Framework\Dependency\Interfaces\FactoryInterface;
 use Psr\Container\ContainerInterface as Container;
@@ -21,6 +22,11 @@ class ConsoleFactory implements FactoryInterface
      */
     public function build(Container $container)
     {
-        return new Console($container->get('console.stream'));
+        return new Console(
+            new Buffer(
+                $container->get('console.stream'),
+                $container->has('console.autoFlush') ? $container->get('console.autoFlush') : true
+            )
+        );
     }
 }
