@@ -142,8 +142,6 @@ class Console implements ConsoleInterface
 
     public function normalizeText(string $message): string
     {
-        $terminator = '';
-
         if (strpos($message, '%textColor') !== false) {
             preg_match_all('#%textColor:([\w\W]+)%#i', $message, $matches);
             $message = strtr($message, array_combine($matches[0], array_map(function ($value) {
@@ -158,13 +156,9 @@ class Console implements ConsoleInterface
             }, $matches[1])));
         }
 
-        if (strpos($message, '%end%') !== false) {
-            $terminator = self::COLOR_TERMINATOR;
-        }
-
         return strtr(
             "$message%end%",
-            ['%end%' => $terminator]
+            ['%end%' => self::COLOR_TERMINATOR]
         );
     }
 }
