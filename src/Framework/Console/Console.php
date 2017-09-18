@@ -145,14 +145,14 @@ class Console implements ConsoleInterface
         $terminator = '';
 
         if (strpos($message, '%textColor') !== false) {
-            preg_match_all('#%textColor:(\w+)%#i', $message, $matches);
+            preg_match_all('#%textColor:([\w\W]+)%#i', $message, $matches);
             $message = strtr($message, array_combine($matches[0], array_map(function ($value) {
                 return self::TEXT_COLORS[$value];
             }, $matches[1])));
         }
 
         if (strpos($message, '%bgColor') !== false) {
-            preg_match_all('#%bgColor:(\w+)%#i', $message, $matches);
+            preg_match_all('#%bgColor:([\w\W]+)%#i', $message, $matches);
             $message = strtr($message, array_combine($matches[0], array_map(function ($value) {
                 return self::BACKGROUND_COLORS[$value];
             }, $matches[1])));
