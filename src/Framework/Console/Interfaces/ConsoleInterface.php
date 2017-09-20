@@ -76,10 +76,11 @@ interface ConsoleInterface
     public function write(string $message): int;
     public function writeLine(string $message): int;
     public function password(string $message): string;
-    public function prompt(string $message): string;
-    public function confirm(string $message): bool;
+    public function prompt(string $message, string $default = ''): string;
+    public function confirm(string $message, string $default = ''): bool;
     public function choice(
         string $message,
-        array $options
+        array $options,
+        string $default = ''
     ): string;
 }

@@ -110,31 +110,40 @@ class Console implements ConsoleInterface
         return $result;
     }
 
-    public function prompt(string $message): string
+    public function prompt(string $message, string $default = ''): string
     {
+        if ($default !== '') {
+            $message .= "($default)";
+        }
+
         $this->write("$message: ");
-        return trim((string) fgets(STDIN));
+        return trim((string) fgets(STDIN)) ?: $default;
     }
 
     public function confirm(
-        string $message
+        string $message,
+        string $default = ''
     ): bool {
-        $response = $this->choice($message, ['y', 'n']);
+        $response = $this->choice($message, array_map(function ($val) use ($default) {
+                return $default === $val ? ucfirst($val) : strtoupper($val);
+            }, ['y', 'n']), $default);
 
         return (strtolower($response) === 'y');
     }
 
     public function choice(
         string $message,
-        array $options
+        array $options,
+        string $default = ''
     ): string
     {
         $response = $this->prompt(
-            $message . '['. implode(', ', array_map('strtolower', $options)) . ']'
+            $message . '['. implode(', ', array_map('strtolower', $options)) . ']',
+            $default
         );
 
         if (!in_array($response, $options)) {
-            $response = $this->choice($message, $options);
+            $response = $this->choice($message, $options, $default);
         }
 
         return $response;
