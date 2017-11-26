@@ -18,12 +18,12 @@ class ArgumentParser implements ArgumentParserInterface
                     list($name,$value)=explode('=', $name, 2);
                     if (in_array($name, $parameters, true)) {
                         $result[$name] = $value;
-                    } else {
-                        $result[$name] = true;
                     }
                 } else {
                     if (isset($arguments[$i+1]) && strpos($arguments[$i+1], '-') !== 0) {
                         $result[$name] = $arguments[++$i];
+                    } else {
+                        $result[$name] = true;
                     }
                 }
             }
