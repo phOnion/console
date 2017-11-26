@@ -72,13 +72,18 @@ class Console implements ConsoleInterface
     public function write(string $message): int
     {
         $message = $this->normalizeText("$message");
+
+        if ($this->getArgument('no-ascii', false) || $this->getArgument('no-colors', false)) {
+            $message = $this->clearMessage($message);
+        }
+
         $this->buffer->write("$message");
 
         if ($this->autoFlush) {
             $this->buffer->flush();
         }
 
-        return strlen(preg_replace("#(\033\[[0-9;0-9]*m)#i", '', $message));
+        return strlen($this->clearMessage($message));
     }
 
     public function writeLine(string $message): int
@@ -169,5 +174,10 @@ class Console implements ConsoleInterface
             "$message%end%",
             ['%end%' => self::COLOR_TERMINATOR]
         );
+    }
+
+    public function clearMessage(string $message)
+    {
+        return preg_replace("#(\033\[[0-9;]*m)#i", '', $message);
     }
 }
