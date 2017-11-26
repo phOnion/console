@@ -156,15 +156,15 @@ class Console implements ConsoleInterface
 
     public function normalizeText(string $message): string
     {
-        if (strpos($message, '%textColor') !== false) {
-            preg_match_all('#%textColor:([a-zA-Z-]+)%#i', $message, $matches);
+        if (strpos($message, '%text') !== false) {
+            preg_match_all('#%text:([a-zA-Z-]+)%#i', $message, $matches);
             $message = strtr($message, array_combine($matches[0], array_map(function ($value) {
                 return self::TEXT_COLORS[$value];
             }, $matches[1])));
         }
 
-        if (strpos($message, '%bgColor') !== false) {
-            preg_match_all('#%bgColor:([a-zA-Z-]+)%#i', $message, $matches);
+        if (strpos($message, '%bg') !== false) {
+            preg_match_all('#%bg:([a-zA-Z-]+)%#i', $message, $matches);
             $message = strtr($message, array_combine($matches[0], array_map(function ($value) {
                 return self::BACKGROUND_COLORS[$value];
             }, $matches[1])));
