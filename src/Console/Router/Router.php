@@ -17,7 +17,11 @@ class Router
      */
     private $handlers;
 
+    /**
+     * @var ArgumentParserInterface
+     */
     private $argumentParser;
+
     public function __construct(ArgumentParserInterface $argumentParser)
     {
         $this->argumentParser = $argumentParser;
