@@ -27,6 +27,11 @@ class Router
         $this->argumentParser = $argumentParser;
     }
 
+    public function getArgumentParser(): ArgumentParserInterface
+    {
+        return $this->argumentParser;
+    }
+
     public function getAvailableCommands(): array
     {
         return array_keys($this->handlers);
