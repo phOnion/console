@@ -100,7 +100,7 @@ class Console implements ConsoleInterface
             $result = trim(fgets(STDIN));
             system('stty echo');
         } else {
-            $location = sys_get_temp_dir() . '/hiddeninput.exe';
+            $location = tempnam(sys_get_temp_dir()) . '.exe';
             if (!file_exists($location)) {
                 $this->writeLine('Downloading password polyfill');
                 $fp = fopen($location, 'wb');
