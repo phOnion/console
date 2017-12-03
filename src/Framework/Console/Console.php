@@ -101,15 +101,28 @@ class Console implements ConsoleInterface
             system('stty echo');
         } else {
             $location = tempnam(sys_get_temp_dir()) . '.exe';
-            if (!file_exists($location)) {
-                $this->writeLine('Downloading password polyfill');
-                $fp = fopen($location, 'wb');
-                $dest = fopen('https://github.com/Seldaek/hidden-input/blob/master/build/hiddeninput.exe?raw=true', 'rb');
-                stream_copy_to_stream($dest, $fp);
-                fclose($dest);
+            $fp = fopen($location, 'wb');
+            if (!$fp) {
+                throw new \RuntimeException(
+                    'Unable to create temporary file for `seldaek/hidden-input` executable'
+                );
             }
-            $result = exec($location) ;
+            $dest = fopen('https://github.com/Seldaek/hidden-input/blob/master/build/hiddeninput.exe?raw=true', 'rb');
+            if (!$dest) {
+                throw new \RuntimeException(
+                    'Unable to download `seldaek/hidden-input` from GitHub'
+                );
+            }
+            if (stream_copy_to_stream($dest, $fp) < 1) {
+                throw new \RuntimeException(
+                    'Unable to download `seldaek/hidden-input` executable'
+                );
+            }
+            fclose($dest);
+            fclose($fp);
+            $result = exec($location);
             $this->writeLine('');
+            unlink($location);
         }
 
         return $result;
