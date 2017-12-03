@@ -144,7 +144,7 @@ class Console implements ConsoleInterface
     ): bool {
         $response = $this->choice($message, array_map(function ($val) use ($default) {
                 return $default === $val ? ucfirst($val) : strtoupper($val);
-            }, ['y', 'n']), $default);
+        }, ['y', 'n']), $default);
 
         return (strtolower($response) === 'y');
     }
@@ -153,8 +153,7 @@ class Console implements ConsoleInterface
         string $message,
         array $options,
         string $default = ''
-    ): string
-    {
+    ): string {
         $response = $this->prompt(
             $message . '['. implode(', ', array_map('strtolower', $options)) . ']',
             $default

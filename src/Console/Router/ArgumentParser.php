@@ -43,7 +43,6 @@ class ArgumentParser implements ArgumentParserInterface
                         }
                     }
                 }
-
             }
         }
 

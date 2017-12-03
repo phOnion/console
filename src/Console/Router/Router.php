@@ -45,7 +45,7 @@ class Router
     public function addCommand(string $name, CommandInterface $command, array $data = [])
     {
         $params = [];
-        if (strpos($name,' ') !== false) {
+        if (strpos($name, ' ') !== false) {
             list($name, $extra)=explode(' ', $name, 2);
             $params = explode(' ', $extra);
         }

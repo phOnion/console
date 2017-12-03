@@ -40,7 +40,7 @@ class Application
                     $console->write("%text:bold-cyan%{$level['function']}%text:gray%(");
                     foreach ($level['args'] as $index => $argument) {
                         if (!is_object($argument)) {
-                            switch(gettype($argument)) {
+                            switch (gettype($argument)) {
                                 case 'string':
                                     $argument = "'$argument'";
                                     break;
@@ -104,15 +104,17 @@ class Application
         }
 
         $console->write("%text:white%GLOBAL ARGUMENTS \t");
-        $console->writeLine("%text:dark-gray%" . implode(' ',
-                array_merge(
-                    array_map(function ($value) {
+        $console->writeLine("%text:dark-gray%" . implode(
+            ' ',
+            array_merge(
+                array_map(function ($value) {
                         return '[-' . $value . ']';
-                    }, self::GLOBAL_FLAGS),
-                    array_map(function ($value) {
+                }, self::GLOBAL_FLAGS),
+                array_map(function ($value) {
                         return '[--' . $value . ']';
-                    }, self::GLOBAL_PARAMS)
-                )));
+                }, self::GLOBAL_PARAMS)
+            )
+        ));
 
         return 0;
     }
@@ -125,18 +127,22 @@ class Application
         $meta = $this->router->getCommandData($command);
         $extra = '';
         if ($meta['extra'] !== '') {
-            $extra = implode(' ', array_map(function ($param) { return '<' . $param . '>'; }, $meta['extra'])) . ' ';
+            $extra = implode(' ', array_map(function ($param) {
+                return '<' . $param . '>';
+            }, $meta['extra'])) . ' ';
         }
         $console->write("%text:white%COMMAND \t");
-        $console->writeLine("%text:bold-yellow%$command%text:dark-gray% $extra" . implode(' ',
-                array_merge(
-                    array_map(function ($value) {
+        $console->writeLine("%text:bold-yellow%$command%text:dark-gray% $extra" . implode(
+            ' ',
+            array_merge(
+                array_map(function ($value) {
                         return '[-' . $value . ']';
-                    }, array_keys($meta['flags'])),
-                    array_map(function ($value) {
+                }, array_keys($meta['flags'])),
+                array_map(function ($value) {
                         return '[--' . $value . ']';
-                    }, array_keys($meta['parameters']))
-                )));
+                }, array_keys($meta['parameters']))
+            )
+        ));
         $console->writeLine('%text:white%DESCRIPTION');
         $console->writeLine("\t%text:dark-gray%" . $meta['description']);
 
