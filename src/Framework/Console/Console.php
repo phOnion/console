@@ -79,7 +79,7 @@ class Console implements ConsoleInterface
 
         $this->buffer->write("$message");
 
-        if ($this->autoFlush) {
+        if ((!$this->getArgument('quiet', false) && !$this->getArgument('q', false)) && $this->autoFlush) {
             $this->buffer->flush();
         }
 
