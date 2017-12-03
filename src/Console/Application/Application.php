@@ -2,58 +2,119 @@
 
 namespace Onion\Console\Application;
 
+use Onion\Console\Router\Router;
 use Onion\Framework\Console\Interfaces\CommandInterface;
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
-use Onion\Console\Router\Router;
+use Onion\Framework\Console\Interfaces\ArgumentParserInterface;
 
 class Application
 {
+    const GLOBAL_FLAGS = ['q', 'v'];
+    const GLOBAL_PARAMS = ['quiet', 'verbose', 'no-colors'];
+
+    /** @var Router */
     private $router;
+
     public function __construct(Router $consoleRouter)
     {
         $this->router = $consoleRouter;
     }
 
-    public function run(array $argv, ConsoleInterface $console): int
+    private function registerExceptionHandler(ConsoleInterface $console)
     {
-        if (!isset($argv[0])) {
-            $console->writeLine('%textColor:red%No command provided');
-            $console->writeLine('%textColor:cyan%Try with --help to see list of available commands');
-            return 1;
-        }
+        set_exception_handler(function (\Throwable $ex) use ($console) {
+            if ($console->hasArgument('quiet')) {
+                $console = $console->withoutArgument('quiet');
+            }
+            if ($console->hasArgument('q')) {
+                $console = $console->withoutArgument('q');
+            }
+            $console->writeLine('%text:yellow%[ %text:red%ERROR%end%%text:yellow% ] - ' . $ex->getMessage());
+            if ($console->getArgument('verbose', false) || $console->getArgument('v', false)) {
+                $console->writeLine("%text:cyan%---------- TRACE --------");
+                foreach ($ex->getTrace() as $index => $level) {
+                    $console->write("#$index - ");
+                    if (isset($level['class'])) {
+                        $console->write("%text:bold-gray%{$level['class']}{$level['type']}");
+                    }
+                    $console->write("%text:bold-cyan%{$level['function']}%text:gray%(");
+                    foreach ($level['args'] as $index => $argument) {
+                        if (!is_object($argument)) {
+                            switch(gettype($argument)) {
+                                case 'string':
+                                    $argument = "'$argument'";
+                                    break;
+                                case 'array':
+                                    $argument = json_encode($argument);
+                                    break;
+                                case 'null':
+                                    $argument = 'null';
+                                    break;
+                                case 'resource':
+                                case 'resource (closed)':
+                                    $argument = 'resource:' . get_resource_type($argument);
+                                    break;
+                                case 'boolean':
+                                    $argument = $argument ? 'true' : 'false';
+                                    break;
+                            }
+                        }
+                        $argument = is_object($argument) ? get_class($argument) . '::object' : $argument;
 
-        if (count($argv) === 1 && $argv[0] === '--help') {
-            $console->writeLine('%textColor:white%HELP');
-            $console->writeLine('');
-            foreach ($this->router->getAvailableCommands() as $command) {
-                $this->displayHelpInfo($console, $command);
+                        $console->write("%text:white%{$argument}" . ($index+1 === count($level['args']) ? '' : ', '));
+                    }
+                    $console->write("%text:gray%) @ ");
+                    $console->writeLine("%text:white%{$level['file']}%text:gray%:%text:white%{$level['line']}");
+                }
             }
 
-            return 0;
-        }
-
-        if (
-            count($argv) === 2 &&
-            $argv[1] === '--help' &&
-            in_array($argv[0], $this->router->getAvailableCommands(), true)
-        ) {
-            $console->writeLine('%textColor:white%HELP');
             $console->writeLine('');
-            $this->displayHelpInfo($console, $argv[0]);
+            return true;
+        });
+    }
 
-            return 0;
+    public function run(array $argv, ConsoleInterface $console): int
+    {
+        $globalArguments = $this->router->getArgumentParser()
+            ->parse($argv, self::GLOBAL_FLAGS, self::GLOBAL_PARAMS);
+        foreach ($globalArguments as $argument => $value) {
+            $console = $console->withArgument($argument, $value);
+        }
+        $this->registerExceptionHandler($console);
+
+        if (isset($argv[0]) && substr($argv[0], 0, 1) !== '-') {
+            /**
+             * @var $command CommandInterface
+             * @var $arguments array
+             */
+            list($command, $arguments)=$this->router->match((string) $argv[0], $argv);
+            foreach ($arguments as $name => $value) {
+                $console = $console->withArgument($name, $value);
+            }
+
+            return $command->trigger($console);
         }
 
-        /**
-         * @var $command CommandInterface
-         * @var $arguments array
-         */
-        list($command, $arguments)=$this->router->match((string) $argv[0], $argv);
-        foreach ($arguments as $name => $value) {
-            $console = $console->withArgument($name, $value);
+        $console->writeLine('%text:red%No command provided');
+        $console->writeLine('%text:cyan%List of available commands');
+
+        $console->writeLine('');
+        foreach ($this->router->getAvailableCommands() as $command) {
+            $this->displayHelpInfo($console, $command);
         }
 
-        return $command->trigger($console);
+        $console->write("%text:white%GLOBAL ARGUMENTS \t");
+        $console->writeLine("%text:dark-gray%" . implode(' ',
+                array_merge(
+                    array_map(function ($value) {
+                        return '[-' . $value . ']';
+                    }, self::GLOBAL_FLAGS),
+                    array_map(function ($value) {
+                        return '[--' . $value . ']';
+                    }, self::GLOBAL_PARAMS)
+                )));
+
+        return 0;
     }
 
     private function displayHelpInfo(ConsoleInterface $console, string $command)
@@ -66,8 +127,8 @@ class Application
         if ($meta['extra'] !== '') {
             $extra = implode(' ', array_map(function ($param) { return '<' . $param . '>'; }, $meta['extra'])) . ' ';
         }
-        $console->write("%textColor:white%COMMAND \t");
-        $console->writeLine("%textColor:bold-yellow%$command%textColor:dark-gray% $extra" . implode(' ',
+        $console->write("%text:white%COMMAND \t");
+        $console->writeLine("%text:bold-yellow%$command%text:dark-gray% $extra" . implode(' ',
                 array_merge(
                     array_map(function ($value) {
                         return '[-' . $value . ']';
@@ -76,29 +137,34 @@ class Application
                         return '[--' . $value . ']';
                     }, array_keys($meta['parameters']))
                 )));
-        $console->writeLine('%textColor:white%DESCRIPTION');
-        $console->writeLine("\t%textColor:dark-gray%" . $meta['description']);
+        $console->writeLine('%text:white%DESCRIPTION');
+        $console->writeLine("\t%text:dark-gray%" . $meta['description']);
 
 
 
         if ($extra !== '' || !empty($meta['flags']) || !empty($meta['parameters'])) {
             if (!empty($meta['flags'])) {
-                $console->writeLine('%textColor:white%FLAGS');
+                $console->writeLine('%text:white%FLAGS');
                 foreach ($meta['flags'] as $flag => $description) {
-                    $console->writeLine("\t%textColor:dark-gray%-$flag");
-                    $console->writeLine("\t%textColor:dark-gray%    " . $description);
+                    $console->writeLine("\t%text:dark-gray%-$flag");
+                    $console->writeLine("\t%text:dark-gray%    " . $description);
                     $console->writeLine('');
                 }
             }
             if (!empty($meta['parameters'])) {
-                $console->writeLine('%textColor:white%PARAMETERS');
+                $console->writeLine('%text:white%PARAMETERS');
                 foreach ($meta['parameters'] as $argument => $description) {
-                    $console->writeLine("\t%textColor:dark-gray%--$argument");
-                    $console->writeLine("\t%textColor:dark-gray%    " . $description);
+                    $console->writeLine("\t%text:dark-gray%--$argument");
+                    $console->writeLine("\t%text:dark-gray%    " . $description);
                     $console->writeLine('');
                 }
             }
         }
         $console->writeLine(PHP_EOL);
+    }
+
+    public function __destruct()
+    {
+        restore_exception_handler();
     }
 }
