@@ -98,11 +98,6 @@ class Application
         $console->writeLine('%text:red%No command provided');
         $console->writeLine('%text:cyan%List of available commands');
 
-        $console->writeLine('');
-        foreach ($this->router->getAvailableCommands() as $command) {
-            $this->displayHelpInfo($console, $command);
-        }
-
         $console->write("%text:white%GLOBAL ARGUMENTS \t");
         $console->writeLine("%text:dark-gray%" . implode(
             ' ',
@@ -115,7 +110,10 @@ class Application
                 }, self::GLOBAL_PARAMS)
             )
         ));
-
+        $console->writeLine('');
+        foreach ($this->router->getAvailableCommands() as $command) {
+            $this->displayHelpInfo($console, $command);
+        }
         return 0;
     }
 
@@ -129,41 +127,36 @@ class Application
         if ($meta['extra'] !== '') {
             $extra = implode(' ', array_map(function ($param) {
                 return '<' . $param . '>';
-            }, $meta['extra'])) . ' ';
+            }, $meta['extra']));
         }
         $console->write("%text:white%COMMAND \t");
-        $console->writeLine("%text:bold-yellow%$command%text:dark-gray% $extra" . implode(
-            ' ',
-            array_merge(
-                array_map(function ($value) {
-                        return '[-' . $value . ']';
-                }, array_keys($meta['flags'])),
-                array_map(function ($value) {
-                        return '[--' . $value . ']';
-                }, array_keys($meta['parameters']))
-            )
-        ));
-        $console->writeLine('%text:white%DESCRIPTION');
-        $console->writeLine("\t%text:dark-gray%" . $meta['description']);
+        $extraLine = "%text:bold-yellow%{$command}%text:dark-gray% {$extra}";
+        foreach ($meta['parameters'] as $name => $param) {
+            $default = !($param['default'] ?? false) ? '' : " = {$param['default']}";
+            $name = !($param['required'] ?? false) ? "[{$name}{$default}]" : "{$name}{$default}";
 
+            $extraLine .= " {$name}  ";
+        }
+        $console->writeLine($extraLine);
 
+        $console->write("%text:white%SUMMARY \t");
+        $console->writeLine("%text:dark-gray%{$meta['summary']}");
+        if (strlen($meta['description']) > 0) {
+            $console->writeLine('%text:white%DESCRIPTION');
+            $console->writeLine("\t%text:dark-gray%" . $meta['description']);
+        }
 
-        if ($extra !== '' || !empty($meta['flags']) || !empty($meta['parameters'])) {
-            if (!empty($meta['flags'])) {
-                $console->writeLine('%text:white%FLAGS');
-                foreach ($meta['flags'] as $flag => $description) {
-                    $console->writeLine("\t%text:dark-gray%-$flag");
-                    $console->writeLine("\t%text:dark-gray%    " . $description);
-                    $console->writeLine('');
-                }
-            }
-            if (!empty($meta['parameters'])) {
-                $console->writeLine('%text:white%PARAMETERS');
-                foreach ($meta['parameters'] as $argument => $description) {
-                    $console->writeLine("\t%text:dark-gray%--$argument");
-                    $console->writeLine("\t%text:dark-gray%    " . $description);
-                    $console->writeLine('');
-                }
+        if ($extra !== '' || !empty($meta['parameters'])) {
+            $console->writeLine('%text:white%ARGUMENTS');
+            foreach ($meta['parameters'] as $name => $param) {
+                $default = !isset($param['default']) ? '' : "={$param['default']}";
+                $required = !($param['required'] ?? false) ? '' : '%text:red%(REQUIRED)';
+
+                $console->writeLine(
+                    "    %text:cyan%{$param['type']}\t%text:green%$name%text:dark-green%{$default} {$required}"
+                );
+                $console->writeLine("\t%text:dark-gray%" . $param['description']);
+                $console->writeLine('');
             }
         }
         $console->writeLine(PHP_EOL);
