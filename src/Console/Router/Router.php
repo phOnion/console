@@ -15,7 +15,7 @@ class Router
     /**
      * @var CommandInterface[]
      */
-    private $handlers;
+    private $handlers = [];
 
     /**
      * @var ArgumentParserInterface
