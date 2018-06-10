@@ -35,9 +35,9 @@ class Application
                 foreach ($ex->getTrace() as $index => $level) {
                     $console->write("#$index - ");
                     if (isset($level['class'])) {
-                        $console->write("%text:bold-gray%{$level['class']}{$level['type']}");
+                        $console->write("%text:italic-white%{$level['class']}{$level['type']}");
                     }
-                    $console->write("%text:bold-cyan%{$level['function']}%text:gray%(");
+                    $console->write("%text:bold-cyan%{$level['function']}%text:white%(");
                     foreach ($level['args'] as $index => $argument) {
                         if (!is_object($argument)) {
                             switch (gettype($argument)) {
@@ -63,8 +63,8 @@ class Application
 
                         $console->write("%text:white%{$argument}" . ($index+1 === count($level['args']) ? '' : ', '));
                     }
-                    $console->write("%text:gray%) @ ");
-                    $console->writeLine("%text:white%{$level['file']}%text:gray%:%text:white%{$level['line']}");
+                    $console->write("%text:white%) @ ");
+                    $console->writeLine("%text:white%{$level['file']}%text:white%:%text:white%{$level['line']}");
                 }
             }
 
@@ -82,12 +82,12 @@ class Application
         }
         $this->registerExceptionHandler($console);
 
-        if (isset($argv[0]) && substr($argv[0], 0, 1) !== '-') {
+        if (isset($argv[1]) && substr($argv[1], 0, 1) !== '-') {
             /**
              * @var $command CommandInterface
              * @var $arguments array
              */
-            list($command, $arguments)=$this->router->match((string) $argv[0], $argv);
+            list($command, $arguments)=$this->router->match((string) $argv[1], $argv);
             foreach ($arguments as $name => $value) {
                 $console = $console->withArgument($name, $value);
             }
@@ -98,8 +98,8 @@ class Application
         $console->writeLine('%text:red%No command provided');
         $console->writeLine('%text:cyan%List of available commands');
 
-        $console->write("%text:white%GLOBAL ARGUMENTS \t");
-        $console->writeLine("%text:dark-gray%" . implode(
+        $console->write("%text:bold-white%GLOBAL ARGUMENTS \t");
+        $console->writeLine("%text:white%" . implode(
             ' ',
             array_merge(
                 array_map(function ($value) {
@@ -129,8 +129,8 @@ class Application
                 return '<' . $param . '>';
             }, $meta['extra']));
         }
-        $console->write("%text:white%COMMAND \t");
-        $extraLine = "%text:bold-yellow%{$command}%text:dark-gray% {$extra}";
+        $console->write("%text:bold-white%COMMAND \t");
+        $extraLine = "%text:bold-yellow%{$command}%text:white% {$extra}";
         foreach ($meta['parameters'] as $name => $param) {
             $default = !($param['default'] ?? false) ? '' : " = {$param['default']}";
             $name = !($param['required'] ?? false) ? "[{$name}{$default}]" : "{$name}{$default}";
@@ -139,23 +139,23 @@ class Application
         }
         $console->writeLine($extraLine);
 
-        $console->write("%text:white%SUMMARY \t");
-        $console->writeLine("%text:dark-gray%{$meta['summary']}");
+        $console->write("%text:bold-white%SUMMARY \t");
+        $console->writeLine("%text:white%{$meta['summary']}");
         if (strlen($meta['description']) > 0) {
-            $console->writeLine('%text:white%DESCRIPTION');
-            $console->writeLine("\t%text:dark-gray%" . $meta['description']);
+            $console->writeLine('%text:bold-white%DESCRIPTION');
+            $console->writeLine("\t%text:white%" . $meta['description']);
         }
 
         if ($extra !== '' || !empty($meta['parameters'])) {
-            $console->writeLine('%text:white%ARGUMENTS');
+            $console->writeLine('%text:bold-white%ARGUMENTS');
             foreach ($meta['parameters'] as $name => $param) {
                 $default = !isset($param['default']) ? '' : "={$param['default']}";
                 $required = !($param['required'] ?? false) ? '' : '%text:red%(REQUIRED)';
 
                 $console->writeLine(
-                    "    %text:cyan%{$param['type']}\t%text:green%$name%text:dark-green%{$default} {$required}"
+                    "    %text:cyan%{$param['type']}\t%text:green%$name%text:green%{$default} {$required}"
                 );
-                $console->writeLine("\t%text:dark-gray%" . $param['description']);
+                $console->writeLine("\t%text:white%" . $param['description']);
                 $console->writeLine('');
             }
         }
