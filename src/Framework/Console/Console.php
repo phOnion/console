@@ -73,7 +73,9 @@ class Console implements ConsoleInterface
     {
         $message = $this->normalizeText("$message");
 
-        if ($this->getArgument('no-ascii', false) || $this->getArgument('no-colors', false)) {
+        $cliColor = (int) (filter_input(INPUT_ENV, 'CLICOLOR', FILTER_SANITIZE_NUMBER_INT) ?? 1);
+        $cliColorForce = (int) (filter_input(INPUT_ENV, 'CLICOLOR_FORCE', FILTER_SANITIZE_NUMBER_INT) ?? 0);
+        if (($cliColor === 0 || $this->getArgument('no-colors', false)) && $cliColorForce === 0) {
             $message = $this->clearMessage($message);
         }
 
