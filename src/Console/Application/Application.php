@@ -92,6 +92,11 @@ class Application
                 $console = $console->withArgument($name, $value);
             }
 
+            if ($console->getArgument('help', false)) {
+                $this->displayHelpInfo($console, $argv[1]);
+                return 0;
+            }
+
             return $command->trigger($console);
         }
 
