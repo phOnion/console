@@ -7,6 +7,22 @@ use Onion\Framework\Console\Interfaces\CommandInterface;
 
 class Router
 {
+    private const GLOBAL_PARAMS = [
+        '--quiet | -q' => [
+            'type' => 'bool',
+            'description' => 'Suppress all command output'
+        ],
+        '--verbose | -v' => [
+            'type' => 'bool',
+        ],
+        '--no-colors' => [
+            'type' => 'bool',
+        ],
+        '--help | -h' => [
+            'type' => 'bool',
+        ],
+    ];
+
     /**
      * @var array
      */
@@ -50,9 +66,15 @@ class Router
             $params = explode(' ', $extra);
         }
 
-        $this->commands[$name] = array_merge($data, ['extra' => array_map(function ($param) {
-            return trim($param, '[]');
-        }, $params)]);
+        foreach (self::GLOBAL_PARAMS as $cmd => $definition) {
+            $data['parameters'][$cmd] = $definition;
+        }
+
+        $this->commands[$name] = array_merge($data, [
+            'extra' => array_map(function ($param) {
+                return trim($param, '[]');
+            }, $params)
+        ]);
         $this->handlers[$name] = $command;
     }
 
@@ -62,13 +84,10 @@ class Router
             throw new \RuntimeException("Command '$command' not found");
         }
 
-        $flags = array_keys($this->commands[$command]['flags']);
-        $params = array_keys($this->commands[$command]['parameters']);
-
-        $options = $this->argumentParser->parse($arguments, $flags, $params);
-        if ($this->commands[$command]['extra'] !== null && strpos($arguments[1] ?? '', '-') !== 0) {
+        $options = $this->argumentParser->parse($arguments, $this->commands[$command]['parameters']);
+        if ($this->commands[$command]['extra'] !== null) {
             foreach ($this->commands[$command]['extra'] as $param) {
-                $options[$param] = $arguments[array_search($param, $this->commands[$command]['extra'])+1] ?? null;
+                $options[$param] = array_shift($arguments);
             }
         }
 
