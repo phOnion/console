@@ -83,6 +83,7 @@ interface ConsoleInterface
     public function withoutArgument(string $argument): ConsoleInterface;
     public function hasArgument(string $argument): bool;
     public function getArgument(string $argument, $default = null);
+    public function getArguments(): array;
 
     public function block(
         string $message,

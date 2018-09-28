@@ -7,6 +7,7 @@ use Onion\Framework\Console\Interfaces\BufferInterface;
 
 class Console implements ConsoleInterface
 {
+    /** @var BufferInterface $buffer */
     private $buffer;
     private $autoFlush = true;
 
@@ -54,6 +55,11 @@ class Console implements ConsoleInterface
         return $this->arguments[$argument] ?? $default;
     }
 
+    public function getArguments(): array
+    {
+        return $this->arguments ?? [];
+    }
+
     public function block(
         string $message,
         int $width = 60
@@ -71,6 +77,11 @@ class Console implements ConsoleInterface
 
     public function write(string $message): int
     {
+        if ($this->hasArgument('quiet')) {
+            $this->buffer->clear();
+            return 0;
+        }
+
         $message = $this->normalizeText("$message");
 
         $cliColor = (int) (filter_input(INPUT_ENV, 'CLICOLOR', FILTER_SANITIZE_NUMBER_INT) ?? 1);
@@ -81,11 +92,7 @@ class Console implements ConsoleInterface
 
         $this->buffer->write("$message");
 
-        if ((!$this->getArgument('quiet', false) && !$this->getArgument('q', false)) && $this->autoFlush) {
-            $this->buffer->flush();
-        }
-
-        return strlen($this->clearMessage($message));
+        return $this->buffer->flush();
     }
 
     public function writeLine(string $message): int
