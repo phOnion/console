@@ -28,7 +28,6 @@ class RouterFactory implements FactoryInterface
         );
         foreach ($commands as $command) {
             $command = array_merge([
-                'flags' => [],
                 'parameters' => [],
             ], $command);
 
