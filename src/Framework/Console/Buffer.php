@@ -33,4 +33,9 @@ class Buffer implements Interfaces\BufferInterface
 
         return strlen($string);
     }
+
+    public function clear(): void
+    {
+        ftruncate($this->stream, 0);
+    }
 }
