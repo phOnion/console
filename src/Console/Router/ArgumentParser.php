@@ -43,6 +43,13 @@ class ArgumentParser implements ArgumentParserInterface
         }
 
         foreach ($parameters as $parameter => $meta) {
+            $parameter = trim(explode('|', $parameter)[0]);
+            if (($meta['required'] ?? false) && !isset($result[$parameter])) {
+                throw new \BadFunctionCallException(
+                    "Missing required parameter '{$parameter}'"
+                );
+            }
+
             if (!isset($meta['type'], $result[$parameter])) {
                 continue;
             }
@@ -51,12 +58,6 @@ class ArgumentParser implements ArgumentParserInterface
             if (function_exists($checkFunction) && !$checkFunction($result[$parameter])) {
                 throw new \InvalidArgumentException(
                     "The value '{$result[$parameter]}' for {$parameter} must be of type {$meta['type']}"
-                );
-            }
-
-            if (($meta['required'] ?? false) && !isset($result[$parameter])) {
-                throw new \BadFunctionCallException(
-                    "Missing required parameter '{$parameter}'"
                 );
             }
         }
