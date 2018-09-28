@@ -36,6 +36,7 @@ class Buffer implements Interfaces\BufferInterface
 
     public function clear(): void
     {
+        $this->content = '';
         ftruncate($this->stream, 0);
     }
 }
