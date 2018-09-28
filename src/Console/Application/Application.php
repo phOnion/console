@@ -96,8 +96,9 @@ class Application
 
         $console->writeLine('');
         foreach ($this->router->getAvailableCommands() as $command) {
-            exit($this->displayHelpInfo($console, $command));
+            $this->displayHelpInfo($console, $command);
         }
+        exit(0);
     }
 
     private function displayHelpInfo(ConsoleInterface $console, string $command)
@@ -114,10 +115,21 @@ class Application
         }
         $console->write("%text:bold-white%COMMAND \t");
         $extraLine = "%text:bold-yellow%{$command}%text:white% {$extra}";
+        foreach ($meta['parameters'] as $name => $param) {
+            $default = !($param['default'] ?? false) ? '' : " = {$param['default']}";
+            $name = !($param['required'] ?? false) ? "[{$name}{$default}]" : "{$name}{$default}";
+
+            $extraLine .= " {$name}";
+        }
         $console->writeLine($extraLine);
 
         $console->write("%text:bold-white%SUMMARY \t");
         $console->writeLine("%text:white%{$meta['summary']}");
+
+        if ($console->hasArgument('compact-output')) {
+            return 0;
+        }
+
         if (strlen($meta['description']) > 0) {
             $console->writeLine('%text:bold-white%DESCRIPTION');
             $console->writeLine("\t%text:white%" . $meta['description']);
