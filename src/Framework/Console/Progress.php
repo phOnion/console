@@ -34,7 +34,7 @@ class Progress
             throw new \InvalidArgumentException('Number of separators must be 2 (placeholder, filler)');
         }
         list($this->placeholder, $this->filler)=$separators;
-        $this->bar = $steps/$length;
+        $this->bar = round($steps/$length, 1);
     }
 
     /**
@@ -82,8 +82,8 @@ class Progress
 
     public function display(ConsoleInterface $console)
     {
-        $buffer = str_repeat($this->filler, (int) $this->ticks);
         $this->ticks = $this->progress/$this->bar;
+        $buffer = str_repeat($this->filler, (int) $this->ticks);
         if ($this->progress === round($this->steps, 0)) {
             $this->ticks++;
         }
