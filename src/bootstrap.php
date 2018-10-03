@@ -3,6 +3,10 @@
 use Onion\Framework\Console\Console;
 use Onion\Framework\Console\Buffer;
 
+if (php_sapi_name() != "cli") {
+    return;
+}
+
 set_error_handler(function ($level, $message, $file, $line) {
     $stream = 'php://stdout';
     switch ($level) {
