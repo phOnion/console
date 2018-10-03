@@ -91,8 +91,8 @@ class Console implements ConsoleInterface
         }
 
         $this->buffer->write("$message");
-
-        return $this->buffer->flush();
+        $this->buffer->flush();
+        return strlen($this->clearMessage($message));
     }
 
     public function writeLine(string $message): int

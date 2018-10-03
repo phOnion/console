@@ -26,7 +26,7 @@ set_error_handler(function ($level, $message, $file, $line) {
     }
 
     $console = new Console(new Buffer($stream));
-    $console->writeLine("%text:white%[ %text:$color%$type%end%%text:white% ] - {$message}");
+    $console->writeLine("%text:white%[ %text:$color%$type%end%%text:white% ] - {$message} - {$file}@{$line}");
     $console->writeLine('');
 }, E_ALL);
 
