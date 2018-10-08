@@ -16,18 +16,6 @@ class Router
             'type' => 'bool',
             'description' => 'Indicate that the command may output extended information'
         ],
-        '--no-colors' => [
-            'type' => 'bool',
-            'description' => 'Disable all color outputs'
-        ],
-        '--help | -h' => [
-            'type' => 'bool',
-            'description' => 'Display help info',
-        ],
-        '--compact-output | --minimal-output' => [
-            'type' => 'bool',
-            'description' => 'Indicate that only minimal output should be emitted by the command'
-        ]
     ];
 
     /**
