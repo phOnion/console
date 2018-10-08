@@ -84,10 +84,6 @@ class Application
             }
             $this->registerExceptionHandler($console);
 
-            if ($console->getArgument('help', $console->getArgument('h'))) {
-                exit($this->displayHelpInfo($console, $argv[1]));
-            }
-
             exit($command->trigger($console));
         }
 
