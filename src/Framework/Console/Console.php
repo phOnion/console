@@ -109,29 +109,22 @@ class Console implements ConsoleInterface
             $result = trim(fgets(STDIN));
             system('stty echo');
         } else {
-            $location = tempnam(sys_get_temp_dir()) . '.exe';
-            $fp = fopen($location, 'wb');
-            if (!$fp) {
-                throw new \RuntimeException(
-                    'Unable to create temporary file for `seldaek/hidden-input` executable'
-                );
+            $location = sys_get_temp_dir() . "/password-prompt.exe";
+            if (!file_exists($location)) {
+
+                $fp = fopen($location, 'wb');
+                $url = 'https://github.com/Seldaek/hidden-input/raw/master/build/hiddeninput.exe?raw=true';
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_HEADER, false);
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_FILE, $fp);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                $result = curl_exec($ch);
+                fclose($fp);
             }
-            $dest = fopen('https://github.com/Seldaek/hidden-input/blob/master/build/hiddeninput.exe?raw=true', 'rb');
-            if (!$dest) {
-                throw new \RuntimeException(
-                    'Unable to download `seldaek/hidden-input` from GitHub'
-                );
-            }
-            if (stream_copy_to_stream($dest, $fp) < 1) {
-                throw new \RuntimeException(
-                    'Unable to download `seldaek/hidden-input` executable'
-                );
-            }
-            fclose($dest);
-            fclose($fp);
+
             $result = exec($location);
             $this->writeLine('');
-            unlink($location);
         }
 
         return $result;
