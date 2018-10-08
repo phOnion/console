@@ -6,8 +6,9 @@ use Onion\Console\Router\Router;
 use Onion\Framework\Console\Interfaces\CommandInterface;
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
 use Onion\Framework\Console\Interfaces\ArgumentParserInterface;
+use Onion\Framework\Console\Interfaces\ApplicationInterface;
 
-class Application
+class Application implements ApplicationInterface
 {
     /** @var Router */
     private $router;
