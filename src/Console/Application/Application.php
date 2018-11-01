@@ -34,7 +34,7 @@ class Application implements ApplicationInterface
                         $console->write("%text:italic-light-yellow%{$level['class']}%text:white%{$level['type']}");
                     }
                     $console->write("%text:bold-cyan%{$level['function']}%text:white%(");
-                    foreach ($level['args'] as $index => $argument) {
+                    foreach ($level['args'] ?? [] as $index => $argument) {
                         if (!is_object($argument)) {
                             switch (gettype($argument)) {
                                 case 'string':
