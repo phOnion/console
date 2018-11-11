@@ -84,7 +84,6 @@ class Router
         }
 
         $options = $this->argumentParser->parse($arguments, $this->commands[$command]['parameters']);
-        var_dump($options, $arguments);
         if ($this->commands[$command]['extra'] !== null) {
             foreach ($this->commands[$command]['extra'] as $param) {
                 $options[$param] = array_shift($arguments);
