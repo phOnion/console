@@ -87,6 +87,10 @@ class Console implements ConsoleInterface
         $cliColor = (int) (getenv('CLICOLOR') ?? 1);
         $cliColorForce = (int) (getenv('CLICOLOR_FORCE') ?? 0);
 
+        if ($this->buffer->isInteractive()) {
+            $message = $this->clearMessage($message);
+        }
+
         if (($cliColor === 0 || $this->getArgument('no-colors', false)) && $cliColorForce === 0) {
             $message = $this->clearMessage($message);
         }
