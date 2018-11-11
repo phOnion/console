@@ -68,7 +68,7 @@ class Console implements ConsoleInterface
 
         $this->writeLine('');
         foreach (str_split($this->normalizeText($message), $width) as $line) {
-            $bytes += $this->writeLine(' '.str_pad(trim($line), $width, ' ', STR_PAD_RIGHT) . ' ');
+            $bytes += $this->writeLine(' ' . str_pad(trim($line), $width, ' ', STR_PAD_RIGHT) . ' ');
         }
         $this->writeLine('');
 
@@ -97,6 +97,7 @@ class Console implements ConsoleInterface
 
         $this->buffer->write("$message");
         $this->buffer->flush();
+
         return strlen($this->clearMessage($message));
     }
 
