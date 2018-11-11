@@ -7,4 +7,5 @@ interface BufferInterface
     public function read(int $length): string;
     public function flush(): int;
     public function clear(): void;
+    public function isInteractive(): bool;
 }

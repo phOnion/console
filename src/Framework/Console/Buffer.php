@@ -39,4 +39,9 @@ class Buffer implements Interfaces\BufferInterface
         $this->content = '';
         ftruncate($this->stream, 0);
     }
+
+    public function isInteractive(): bool
+    {
+        return stream_isatty($this->stream);
+    }
 }
