@@ -84,10 +84,10 @@ class Console implements ConsoleInterface
 
         $message = $this->normalizeText("$message");
 
-        $cliColor = (int) (getenv('CLICOLOR') ?? 1);
-        $cliColorForce = (int) (getenv('CLICOLOR_FORCE') ?? 0);
+        $cliColor = (int) getenv('CLICOLOR');
+        $cliColorForce = (int) (getenv('CLICOLOR_FORCE') ?: 0);
 
-        if ($this->buffer->isInteractive()) {
+        if (!$this->buffer->isInteractive()) {
             $message = $this->clearMessage($message);
         }
 
