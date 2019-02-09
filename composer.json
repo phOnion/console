@@ -3,7 +3,8 @@
   "description": "Set of helper classes for developing CLI applications",
   "require": {
     "roave/security-advisories": "dev-master",
-    "onion/framework": "^2.0"
+    "onion/framework": "^2.0",
+    "seld/signal-handler": "^1.1"
   },
   "autoload": {
     "psr-4": {
