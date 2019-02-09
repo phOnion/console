@@ -4,9 +4,10 @@ namespace Onion\Console\Application;
 
 use Onion\Console\Router\Router;
 use Onion\Framework\Console\Interfaces\CommandInterface;
+use Onion\Framework\Console\Interfaces\SignalAwareCommandInterface;
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
-use Onion\Framework\Console\Interfaces\ArgumentParserInterface;
 use Onion\Framework\Console\Interfaces\ApplicationInterface;
+use Seld\Signal\SignalHandler;
 
 class Application implements ApplicationInterface
 {
@@ -84,6 +85,14 @@ class Application implements ApplicationInterface
                 $console = $console->withArgument(ltrim($name, '-'), $value);
             }
             $this->registerExceptionHandler($console);
+
+            $signalHandler = SignalHandler::create(['SIGINT', 'SIGTERM'], function ($signal, $signalName) use ($command, $console) {
+                if ($command instanceof SignalAwareCommandInterface) {
+                    $console->writeLine("%text:yellow% Received '{$signalName}' signal, exiting");
+                    $command->exit($console, $signalName);
+                }
+                exit(128 + $signal);
+            });
 
             exit($command->trigger($console));
         }
