@@ -1,8 +1,7 @@
 <?php declare(strict_types=1);
-namespace Onion\Framework\Console;
+namespace Onion\Framework\Console\Components;
 
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
-use SplObserver;
 
 class Progress
 {
@@ -17,11 +16,6 @@ class Progress
     private $ticks = 0;
 
     private $lastOutputLength = 0;
-
-    /**
-     * @var \SplObserver[]
-     */
-    private $observers = [];
 
     private $format = '[{buffer}] ({progress}/{steps})';
 
@@ -102,25 +96,5 @@ class Progress
 
         $console->write(str_repeat(chr(8), $this->lastOutputLength));
         $this->lastOutputLength = $console->write($output);
-    }
-
-    public function attach(SplObserver $observer)
-    {
-        $this->observers[spl_object_hash($observer)] = $observer;
-    }
-
-    public function detach(SplObserver $observer)
-    {
-        $hash = spl_object_hash($observer);
-        if (isset($this->observers[$hash])) {
-            unset($this->observers[$hash]);
-        }
-    }
-
-    public function notify()
-    {
-        foreach ($this->observers as $observer) {
-            $observer->update($this);
-        }
     }
 }

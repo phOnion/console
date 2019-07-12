@@ -3,25 +3,17 @@
 namespace Onion\Framework\Console;
 
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
-use Onion\Framework\Console\Interfaces\BufferInterface;
+use Onion\Framework\Loop\Interfaces\ResourceInterface;
+use Seld\CliPrompt\CliPrompt;
 
-class Console implements ConsoleInterface
+class Console implements ConsoleInterface, \SplObserver
 {
-    /** @var BufferInterface $buffer */
-    private $buffer;
-    private $autoFlush = true;
-
+    private $stream;
     private $arguments = [];
 
-    public function __construct(BufferInterface $buffer, bool $autoFlush = true)
+    public function __construct(ResourceInterface $stream)
     {
-        $this->buffer = $buffer;
-        $this->autoFlush = $autoFlush;
-    }
-
-    public function getBuffer(): BufferInterface
-    {
-        return $this->buffer;
+        $this->stream = $stream;
     }
 
     public function withArgument(string $argument, $value): ConsoleInterface
@@ -64,76 +56,39 @@ class Console implements ConsoleInterface
         string $message,
         int $width = 60
     ): int {
-        $bytes = 0;
-
-        $this->writeLine('');
-        foreach (str_split($this->normalizeText($message), $width) as $line) {
-            $bytes += $this->writeLine(' ' . str_pad(trim($line), $width, ' ', STR_PAD_RIGHT) . ' ');
-        }
-        $this->writeLine('');
-
-        return $bytes;
+        return $this->writeLine(wordwrap($message, $width, PHP_EOL) . PHP_EOL);
     }
 
     public function write(string $message): int
     {
         if ($this->hasArgument('quiet')) {
-            $this->buffer->clear();
             return 0;
         }
 
-        $message = $this->normalizeText("$message");
+        $message = $this->normalizeText($message);
 
         $cliColor = (int) getenv('CLICOLOR');
         $cliColorForce = (int) (getenv('CLICOLOR_FORCE') ?: 0);
-
-        if (!$this->buffer->isInteractive()) {
-            $message = $this->clearMessage($message);
-        }
 
         if (($cliColor === 0 || $this->getArgument('no-colors', false)) && $cliColorForce === 0) {
             $message = $this->clearMessage($message);
         }
 
-        $this->buffer->write("$message");
-        $this->buffer->flush();
+        $this->stream->write("$message");
 
         return strlen($this->clearMessage($message));
     }
 
     public function writeLine(string $message): int
     {
-        return (int) $this->write($message . PHP_EOL);
+        return $this->write($message . PHP_EOL);
     }
 
     public function password(string $message): string
     {
         $this->write(sprintf('%s: ', $message));
-        $this->buffer->flush();
-        if (stripos(PHP_OS, 'win') === false) {
-            system('stty -echo');
-            $result = trim(fgets(STDIN));
-            system('stty echo');
-        } else {
-            $location = sys_get_temp_dir() . "/password-prompt.exe";
-            if (!file_exists($location)) {
 
-                $fp = fopen($location, 'wb');
-                $url = 'https://github.com/Seldaek/hidden-input/raw/master/build/hiddeninput.exe?raw=true';
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_HEADER, false);
-                curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_FILE, $fp);
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                $result = curl_exec($ch);
-                fclose($fp);
-            }
-
-            $result = exec($location);
-            $this->writeLine('');
-        }
-
-        return $result;
+        return CliPrompt::hiddenPrompt(true);
     }
 
     public function prompt(string $message, string $default = ''): string
@@ -198,5 +153,10 @@ class Console implements ConsoleInterface
     public function clearMessage(string $message)
     {
         return preg_replace("#(\033\[[0-9;]*m)#i", '', $message);
+    }
+
+    public function update(\SplSubject $subject)
+    {
+        $subject->display($this);
     }
 }

@@ -14,5 +14,5 @@ interface CommandInterface
      *
      * @return int The return code of the call
      */
-    public function trigger(ConsoleInterface $console): int;
+    public function trigger(ConsoleInterface $console);
 }
