@@ -3,7 +3,6 @@
 namespace Onion\Framework\Console;
 
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
-use Onion\Framework\Loop\Interfaces\ResourceInterface;
 use Seld\CliPrompt\CliPrompt;
 
 class Console implements ConsoleInterface, \SplObserver
@@ -11,9 +10,14 @@ class Console implements ConsoleInterface, \SplObserver
     private $stream;
     private $arguments = [];
 
-    public function __construct(ResourceInterface $stream)
+    public function __construct($stream)
     {
         $this->stream = $stream;
+    }
+
+    public static function create($stream): self
+    {
+        return new static($stream);
     }
 
     public function withArgument(string $argument, $value): ConsoleInterface
@@ -74,7 +78,7 @@ class Console implements ConsoleInterface, \SplObserver
             $message = $this->clearMessage($message);
         }
 
-        $this->stream->write("$message");
+        fwrite($this->stream, $message);
 
         return strlen($this->clearMessage($message));
     }

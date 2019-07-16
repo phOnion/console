@@ -4,8 +4,6 @@
   "require": {
     "roave/security-advisories": "dev-master",
     "seld/signal-handler": "^1.1",
-    "onion/event-loop": "dev-master",
-    "onion/promise": "dev-master",
     "seld/cli-prompt": "^1.0"
   },
   "autoload": {
