@@ -69,7 +69,7 @@ class Application implements ApplicationInterface
         });
     }
 
-    public function run(array $argv, ConsoleInterface $console): int
+    public function run(array $argv, ConsoleInterface $console)
     {
         $this->registerExceptionHandler($console);
         if (isset($argv[1]) && substr($argv[1], 0, 1) !== '-') {
@@ -104,8 +104,6 @@ class Application implements ApplicationInterface
         foreach ($this->router->getAvailableCommands() as $command) {
             $this->displayHelpInfo($console, $command);
         }
-
-        return 0;
     }
 
     private function displayHelpInfo(ConsoleInterface $console, string $command)

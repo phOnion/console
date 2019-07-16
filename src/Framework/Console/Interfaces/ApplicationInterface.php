@@ -3,5 +3,5 @@ namespace Onion\Framework\Console\Interfaces;
 
 interface ApplicationInterface
 {
-    public function run(array $argv, ConsoleInterface $console): int;
+    public function run(array $argv, ConsoleInterface $console);
 }
