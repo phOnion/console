@@ -102,8 +102,10 @@ class Application implements ApplicationInterface
 
         $console->writeLine('');
         foreach ($this->router->getAvailableCommands() as $command) {
-            return $this->displayHelpInfo($console, $command);
+            $this->displayHelpInfo($console, $command);
         }
+
+        return 0;
     }
 
     private function displayHelpInfo(ConsoleInterface $console, string $command)
