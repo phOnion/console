@@ -12,7 +12,7 @@ class Router
             'type' => 'bool',
             'description' => 'Suppress all command output'
         ],
-        '--verbose | -v' => [
+        '--verbose | -vvv' => [
             'type' => 'bool',
             'description' => 'Indicate that the command may output extended information'
         ],
