@@ -3,13 +3,12 @@
 namespace Onion\Console\Application;
 
 use Onion\Console\Router\Router;
-use Onion\Framework\Console\Interfaces\CommandInterface;
-use Onion\Framework\Console\Interfaces\SignalAwareCommandInterface;
-use Onion\Framework\Console\Interfaces\ConsoleInterface;
 use Onion\Framework\Console\Interfaces\ApplicationInterface;
-use Seld\Signal\SignalHandler;
+use Onion\Framework\Console\Interfaces\CommandInterface;
+use Onion\Framework\Console\Interfaces\ConsoleInterface;
+use Onion\Framework\Console\Interfaces\SignalAwareCommandInterface;
 use Onion\Framework\Loop\Coroutine;
-use function Onion\Framework\Loop\scheduler;
+use Seld\Signal\SignalHandler;
 
 class Application implements ApplicationInterface
 {
@@ -105,7 +104,7 @@ class Application implements ApplicationInterface
 
                 $console->writeLine('');
                 foreach ($this->router->getAvailableCommands() as $command) {
-                    yield $this->displayHelpInfo($console, $command);
+                    yield from $this->displayHelpInfo($console, $command);
                 }
             }
         }, [$argv, $console]);
