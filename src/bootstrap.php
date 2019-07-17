@@ -1,6 +1,5 @@
 <?php
 use Onion\Framework\Console\Console;
-use Onion\Framework\Loop\Descriptor;
 
 if (php_sapi_name() != "cli") {
     return;
