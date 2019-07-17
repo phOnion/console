@@ -35,7 +35,7 @@ set_error_handler(function ($level, $message, $file, $line) {
 
 set_exception_handler(function (\Throwable $ex) {
     $console = new Console(new Descriptor(fopen('php://stderr', 'wb')));
-    $console->writeLine('%bg:red%%text:yellow%[ %text:red%ERROR%end%%text:yellow% ] - ' . $ex->getMessage());
+    $console->writeLine("%bg:red%%text:yellow%[ %text:red%ERROR%end%%text:yellow% ] - {$ex->getMessage()} - {$ex->getFile()}@{$ex->getLine()}");
     $console->writeLine('');
     exit($ex->getCode() ?: 1);
 });

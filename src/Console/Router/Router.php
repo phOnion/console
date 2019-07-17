@@ -7,20 +7,19 @@ use Onion\Framework\Console\Interfaces\CommandInterface;
 
 class Router
 {
-    private const GLOBAL_PARAMS = [
-        '--quiet | -q' => [
-            'type' => 'bool',
-            'description' => 'Suppress all command output'
-        ],
-        '--verbose | -vvv' => [
-            'type' => 'bool',
-            'description' => 'Indicate that the command may output extended information'
-        ],
-        '--no-colors | --no-color' => [
-            'type' => 'bool',
-            'description' => 'Indicate that the command output should not include colors'
-        ],
-    ];
+    private const GLOBAL_PARAMS = [[
+        'name' => '--quiet | -q',
+        'type' => 'bool',
+        'description' => 'Suppress all command output'
+    ], [
+        'name' => '--verbose | -vvv',
+        'type' => 'bool',
+        'description' => 'Indicate that the command may output extended information'
+    ], [
+        'name' => '--no-colors | --no-color',
+        'type' => 'bool',
+        'description' => 'Indicate that the command output should not include colors'
+    ]];
 
     /**
      * @var array

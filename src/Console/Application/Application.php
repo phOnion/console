@@ -117,7 +117,8 @@ class Application implements ApplicationInterface
         }
         $console->write("%text:bold-white%COMMAND \t");
         $extraLine = "%text:bold-yellow%{$command}%text:white% {$extra}";
-        foreach ($meta['parameters'] as $name => $param) {
+        foreach ($meta['parameters'] as $param) {
+            $name = $param['name'];
             $default = !($param['default'] ?? false) ? '' : " = {$param['default']}";
             $name = !($param['required'] ?? false) ? "[{$name}{$default}]" : "{$name}{$default}";
 
@@ -141,12 +142,12 @@ class Application implements ApplicationInterface
 
         if ($extra !== '' || !empty($meta['parameters'] ?? [])) {
             $console->writeLine('%text:bold-white%ARGUMENTS');
-            foreach ($meta['parameters'] as $name => $param) {
+            foreach ($meta['parameters'] as $param) {
                 $default = !isset($param['default']) ? '' : "={$param['default']}";
                 $required = !($param['required'] ?? false) ? '' : '%text:red%(REQUIRED)';
 
                 $console->writeLine(
-                    "    %text:cyan%{$param['type']}\t%text:green%$name%text:green%{$default} {$required}"
+                    "    %text:cyan%{$param['type']}\t%text:green%{$param['name']}%text:green%{$default} {$required}"
                 );
                 if (isset($param['description'])) {
                     $console->writeLine("\t%text:white%" . $param['description']);

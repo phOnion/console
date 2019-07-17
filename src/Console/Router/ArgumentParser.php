@@ -11,7 +11,7 @@ class ArgumentParser implements ArgumentParserInterface
         $result = [];
 
         foreach (array_keys($parameters) as $parameter) {
-            $aliases = array_map('trim', explode('|', $parameter));
+            $aliases = array_map('trim', explode('|', $parameter['name']));
             foreach ($aliases as $alias) {
                 $i = array_search($alias, $arguments);
                 if ($i === false) {
@@ -22,7 +22,7 @@ class ArgumentParser implements ArgumentParserInterface
                 if (stripos($argument, "{$alias}=") === 0) {
                     [$p, $value] = explode('=', $argument, 2);
                     $result[$aliases[0]] = $value;
-                    unset($arguments[$index]);
+                    unset($arguments[$i]);
                     continue;
                 }
 
@@ -42,8 +42,8 @@ class ArgumentParser implements ArgumentParserInterface
             }
         }
 
-        foreach ($parameters as $parameter => $meta) {
-            $parameter = trim(explode('|', $parameter)[0]);
+        foreach ($parameters as $meta) {
+            $parameter = trim(explode('|', $meta['name'])[0]);
             if (($meta['required'] ?? false) && !isset($result[$parameter])) {
                 throw new \BadFunctionCallException(
                     "Missing required parameter '{$parameter}'"
