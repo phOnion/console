@@ -10,7 +10,7 @@ class ArgumentParser implements ArgumentParserInterface
     {
         $result = [];
 
-        foreach (array_keys($parameters) as $parameter) {
+        foreach ($parameters as $parameter) {
             $aliases = array_map('trim', explode('|', $parameter['name']));
             foreach ($aliases as $alias) {
                 $i = array_search($alias, $arguments);
