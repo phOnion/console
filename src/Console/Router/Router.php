@@ -82,7 +82,7 @@ class Router
             throw new \RuntimeException("Command '$command' not found");
         }
 
-        $options = $this->argumentParser->parse($arguments, $this->commands[$command]['parameters']);
+        $options = $this->argumentParser->parse($arguments, $this->commands[$command]['parameters'] ?? []);
         if ($this->commands[$command]['extra'] !== null) {
             foreach ($this->commands[$command]['extra'] as $param) {
                 $options[$param] = array_shift($arguments);
