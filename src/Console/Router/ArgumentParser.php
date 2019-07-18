@@ -6,6 +6,14 @@ use Onion\Framework\Console\Interfaces\ArgumentParserInterface;
 
 class ArgumentParser implements ArgumentParserInterface
 {
+    private const TYPE_MAP = [
+        'int' => FILTER_VALIDATE_INT,
+        'integer' => FILTER_VALIDATE_INT,
+        'float' => FILTER_VALIDATE_FLOAT,
+        'double' => FILTER_VALIDATE_FLOAT,
+        'bool' => FILTER_VALIDATE_BOOLEAN,
+    ];
+
     public function parse(array &$arguments, array $parameters = []): array
     {
         $result = [];
@@ -28,7 +36,7 @@ class ArgumentParser implements ArgumentParserInterface
 
                 if ($argument === $alias) {
                     $value = true;
-                    $type = $parameters[$alias]['type'] ?? '';
+                    $type = $parameter['type'] ?? '';
                     unset($arguments[$i]);
 
                     if (stripos($arguments[$i+1] ?? '-', '-') !== 0 && $type !== 'bool') {
@@ -50,12 +58,17 @@ class ArgumentParser implements ArgumentParserInterface
                 );
             }
 
-            if (!isset($meta['type'], $result[$parameter])) {
+            if (isset($meta['default']) && !isset($result[$parameter])) {
+                $result[$parameter] = $meta['default'];
+
                 continue;
             }
 
-            $checkFunction = "is_{$meta['type']}";
-            if (function_exists($checkFunction) && !$checkFunction($result[$parameter])) {
+            if (!isset($meta['type'], $result[$parameter]) || !isset(static::TYPE_MAP[$meta['type']])) {
+                continue;
+            }
+
+            if (!filter_var($result[$parameter], static::TYPE_MAP[$meta['type']])) {
                 throw new \InvalidArgumentException(
                     "The value '{$result[$parameter]}' for {$parameter} must be of type {$meta['type']}"
                 );
