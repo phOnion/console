@@ -71,8 +71,11 @@ class Console implements ConsoleInterface, \SplObserver
 
         $message = $this->normalizeText($message);
 
-        $cliColor = (int) getenv('CLICOLOR');
-        $cliColorForce = (int) (getenv('CLICOLOR_FORCE') ?: 0);
+        $cliColorEnv = getenv('CLICOLOR');
+        $cliForceColorEnv = getenv('CLICOLOR_FORCE');
+
+        $cliColor = (int) ($cliColorEnv !== false ? $cliColorEnv : 1);
+        $cliColorForce = (int) ($cliForceColorEnv !== false ? $cliForceColorEnv : 0);
 
         if (($cliColor === 0 || $this->getArgument('no-colors', false)) && $cliColorForce === 0) {
             $message = $this->clearMessage($message);
