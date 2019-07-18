@@ -64,8 +64,8 @@ class Router
             $params = explode(' ', $extra);
         }
 
-        foreach (self::GLOBAL_PARAMS as $cmd => $definition) {
-            $data['parameters'][$cmd] = $definition;
+        foreach (self::GLOBAL_PARAMS as $definition) {
+            $data['parameters'][] = $definition;
         }
 
         $this->commands[$name] = array_merge($data, [
