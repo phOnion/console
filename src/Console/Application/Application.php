@@ -29,6 +29,9 @@ class Application implements ApplicationInterface
             if ($console->getArgument('verbose', false) || $console->getArgument('v', false)) {
                 $console->writeLine("%text:cyan%---------- TRACE --------");
                 foreach ($ex->getTrace() as $index => $level) {
+                    $level['line'] = $level['line'] ?? 0;
+                    $level['file'] = $level['file'] ?? '<unknown>';
+
                     $console->write("#$index - ");
                     if (isset($level['class'])) {
                         $console->write("%text:italic-light-yellow%{$level['class']}%text:white%{$level['type']}");
