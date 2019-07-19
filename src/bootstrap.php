@@ -27,6 +27,11 @@ set_error_handler(function ($level, $message, $file, $line) {
             break;
     }
 
+    $current = error_reporting();
+    if (($current & $level) !== $level) {
+        return;
+    }
+
     $console = new Console(fopen($stream, 'wb'));
     $console->writeLine("%text:white%[ %text:$color%$type%end%%text:white% ] - {$message} - {$file}@{$line}");
     $console->writeLine('');
