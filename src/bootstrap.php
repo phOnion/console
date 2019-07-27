@@ -33,15 +33,15 @@ set_error_handler(function ($level, $message, $file, $line) {
     }
 
     $console = new Console(fopen($stream, 'wb'));
-    $console->writeLine("%text:white%[ %text:$color%$type%end%%text:white% ] - {$message} - {$file}@{$line}");
+    $console->writeLine("%text:white%[ %text:$color%$type%end%%text:white% ] - {$message} - {$file}:{$line}");
     $console->writeLine('');
 }, E_ALL);
 
 set_exception_handler(function (\Throwable $ex) {
     $console = new Console(fopen('php://stderr', 'wb'));
-    $console->writeLine("%bg:red%%text:yellow%[ %text:red%ERROR%end%%text:yellow% ] - {$ex->getMessage()} - {$ex->getFile()}@{$ex->getLine()}");
+    $console->writeLine("%bg:red%%text:yellow%[ %text:red%ERROR%end%%text:yellow% ] - {$ex->getMessage()} - {$ex->getFile()}:{$ex->getLine()}");
     while (($ex = $ex->getPrevious()) !== null) {
-        $console->writeLine("\t%text:yellow%{$ex->getMessage()} - {$ex->getFile()}@{$ex->getLine()}");
+        $console->writeLine("\t%text:yellow%{$ex->getMessage()} - {$ex->getFile()}:{$ex->getLine()}");
     }
     $console->writeLine('');
     exit($ex !== null ? $ex->getCode() : 1);
