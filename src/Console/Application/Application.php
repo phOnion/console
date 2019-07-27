@@ -3,6 +3,7 @@
 namespace Onion\Console\Application;
 
 use Onion\Console\Router\Router;
+use Onion\Framework\Console\Components\Box;
 use Onion\Framework\Console\Interfaces\ApplicationInterface;
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
 use Onion\Framework\Console\Interfaces\SignalAwareCommandInterface;
@@ -120,13 +121,6 @@ class Application implements ApplicationInterface
         }
         $console->write("%text:bold-white%COMMAND \t");
         $extraLine = "%text:bold-yellow%{$command}%text:white% {$extra}";
-        foreach ($meta['parameters'] as $param) {
-            $name = $param['name'];
-            $default = !($param['default'] ?? false) ? '' : " = {$param['default']}";
-            $name = !($param['required'] ?? false) ? "[{$name}{$default}]" : "{$name}{$default}";
-
-            $extraLine .= " {$name}";
-        }
         $console->writeLine($extraLine);
 
         if (isset($meta['summary'])) {
@@ -146,14 +140,18 @@ class Application implements ApplicationInterface
         if ($extra !== '' || !empty($meta['parameters'] ?? [])) {
             $console->writeLine('%text:bold-white%ARGUMENTS');
             foreach ($meta['parameters'] as $param) {
-                $default = !isset($param['default']) ? '' : "={$param['default']}";
+                $param['type'] = str_pad($param['type'], 5, ' ');
                 $required = !($param['required'] ?? false) ? '' : '%text:red%(REQUIRED)';
-
-                $console->writeLine(
-                    "    %text:cyan%{$param['type']}\t%text:green%{$param['name']}%text:green%{$default} {$required}"
+                $default = $param['default'] ?? '';
+                $console->write(
+                    "    %text:cyan%{$param['type']}\t%text:green%{$param['name']}%text:green%{$required}\t%end%%text:italic-blue% {$default}"
                 );
+
                 if (isset($param['description'])) {
-                    $console->writeLine("\t%text:white%" . $param['description']);
+                    $box = new Box(120, 'left', ' ', "\t", ' ');
+                    $box->addMessage("%text:white%" . $param['description']);
+                    $console->write((string) $box);
+
                 }
                 $console->writeLine('');
             }
