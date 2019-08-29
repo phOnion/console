@@ -12,5 +12,5 @@ interface CommandInterface
     /**
      * @param ConsoleInterface $console The currently active console
      */
-    public function trigger(ConsoleInterface $console);
+    public function trigger(ConsoleInterface $console): int;
 }
