@@ -104,7 +104,12 @@ class Console implements ConsoleInterface, \SplObserver
             $message .= "($default)";
         }
 
-        $this->write("$message: ");
+
+        if (function_exists('\readline')) {
+            return trim((string) readline($this->normalizeText("{$message} "))) ?: $default;
+        }
+
+        $this->write("$message ");
         return trim((string) fgets(STDIN)) ?: $default;
     }
 
