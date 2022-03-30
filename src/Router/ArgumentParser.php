@@ -1,17 +1,19 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Onion\Console\Router;
+declare(strict_types=1);
+
+namespace Onion\Framework\Console\Router;
 
 use Onion\Framework\Console\Interfaces\ArgumentParserInterface;
 
 class ArgumentParser implements ArgumentParserInterface
 {
     private const TYPE_MAP = [
-        'int' => FILTER_VALIDATE_INT,
-        'integer' => FILTER_VALIDATE_INT,
-        'float' => FILTER_VALIDATE_FLOAT,
-        'double' => FILTER_VALIDATE_FLOAT,
-        'bool' => FILTER_VALIDATE_BOOLEAN,
+        'int' => '/^-?\d+$/',
+        'integer' => '/^-?\d+$/i',
+        'float' => '/^(([-+])?[.,]\b(\d+)(?:[Ee]([+-])?(\d+)?)?\b)|(?:([+-])?\b(\d+)(?:[.,]?(\d+))?(?:[Ee]([+-])?(\d+)?)?\b)$/',
+        'double' => '/^(([-+])?[.,]\b(\d+)(?:[Ee]([+-])?(\d+)?)?\b)|(?:([+-])?\b(\d+)(?:[.,]?(\d+))?(?:[Ee]([+-])?(\d+)?)?\b)$/',
+        'bool' => '/^(?:true|yes|1|on|off|0|no|false)$/',
     ];
 
     public function parse(array &$arguments, array $parameters = []): array
@@ -39,12 +41,12 @@ class ArgumentParser implements ArgumentParserInterface
                     $type = $parameter['type'] ?? '';
                     unset($arguments[$i]);
 
-                    if (stripos($arguments[$i+1] ?? '-', '-') !== 0 && $type !== 'bool') {
-                        $value = $arguments[$i+1];
-                        unset($arguments[$i+1]);
+                    if (stripos($arguments[$i + 1] ?? '-', '-') !== 0 && $type !== 'bool') {
+                        $value = $arguments[$i + 1];
+                        unset($arguments[$i + 1]);
                     }
 
-                    $result[$aliases[0]] = $value;
+                    $result[trim($aliases[0], '-')] = $value;
                     continue;
                 }
             }
@@ -64,7 +66,7 @@ class ArgumentParser implements ArgumentParserInterface
                 continue;
             }
 
-            if (!isset($meta['type'], $result[$parameter]) || !isset(static::TYPE_MAP[$meta['type']])) {
+            if (!isset($meta['type'], $result[$parameter]) || preg_match(static::TYPE_MAP[$meta['type']], $result[$parameter]) !== false) {
                 continue;
             }
 

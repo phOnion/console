@@ -1,16 +1,18 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Onion\Framework\Console\Components;
 
+use Onion\Framework\Console\Interfaces\ComponentInterface;
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
 
-class Progress
+class Progress implements ComponentInterface
 {
-    private $length;
-    private $steps;
-    private $progress = 1;
+    private int $progress = 1;
 
-    private $placeholder;
-    private $filler;
+    private string $placeholder;
+    private string $filler;
 
     private $bar;
     private $ticks = 0;
@@ -19,32 +21,19 @@ class Progress
 
     private $format = '[{buffer}] ({progress}/{steps})';
 
-    public function __construct(int $length, int $steps, $separators = ['-', '#'])
-    {
+    public function __construct(
+        private readonly int $length,
+        private readonly int $steps,
+        $separators = ['-', '#']
+    ) {
         $this->length = $length;
         $this->steps = $steps;
 
-        if (count($separators)< 2) {
+        if (count($separators) < 2) {
             throw new \InvalidArgumentException('Number of separators must be 2 (placeholder, filler)');
         }
-        list($this->placeholder, $this->filler)=$separators;
-        $this->bar = round($steps/$length, 1);
-    }
-
-    /**
-     * @return int
-     */
-    public function getLength(): int
-    {
-        return $this->length;
-    }
-
-    /**
-     * @return int
-     */
-    public function getSteps(): int
-    {
-        return $this->steps;
+        list($this->placeholder, $this->filler) = $separators;
+        $this->bar = round($steps / $length, 1);
     }
 
     /**
@@ -74,9 +63,9 @@ class Progress
         }
     }
 
-    public function display(ConsoleInterface $console)
+    public function flush(ConsoleInterface $console): void
     {
-        $this->ticks = $this->progress/$this->bar;
+        $this->ticks = $this->progress / $this->bar;
         $buffer = str_repeat($this->filler, (int) $this->ticks);
         if ($this->progress === round($this->steps, 0)) {
             $this->ticks++;

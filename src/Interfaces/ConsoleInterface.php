@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Onion\Framework\Console\Interfaces;
 
@@ -15,7 +17,6 @@ interface ConsoleInterface
         'red' => "\33[0;31m",
         'yellow' => "\33[0;33m",
         'purple' => "\33[0;35m",
-        'brown' => "\33[0;33m",
         'bold-white' => "\33[1;37m",
         'bold-blue' => "\33[1;34m",
         'bold-green' => "\33[1;32m",
@@ -71,7 +72,7 @@ interface ConsoleInterface
         'green' =>          "\33[42m",
         'cyan'  =>          "\33[46m",
         'red'   =>          "\33[1;41m",
-        'yellow'=>          "\33[1;43m",
+        'yellow' =>          "\33[1;43m",
         'purple' =>         "\33[45m",
         'brown' =>          "\33[43m",
     ];
@@ -99,4 +100,6 @@ interface ConsoleInterface
         array $options,
         string $default = ''
     ): string;
+
+    public function copy(mixed $resource): int;
 }

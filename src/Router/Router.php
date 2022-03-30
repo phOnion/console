@@ -1,49 +1,19 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Onion\Console\Router;
+declare(strict_types=1);
+
+namespace Onion\Framework\Console\Router;
 
 use Onion\Framework\Console\Interfaces\ArgumentParserInterface;
 use Onion\Framework\Console\Interfaces\CommandInterface;
 
 class Router
 {
-    private const GLOBAL_PARAMS = [[
-        'name' => '--quiet | -q',
-        'type' => 'bool',
-        'description' => 'Suppress all command output'
-    ], [
-        'name' => '--verbose | -vvv',
-        'type' => 'bool',
-        'description' => 'Indicate that the command may output extended information'
-    ], [
-        'name' => '--no-colors | --no-color',
-        'type' => 'bool',
-        'description' => 'Indicate that the command output should not include colors'
-    ]];
+    private array $commands;
+    private array $handlers = [];
 
-    /**
-     * @var array
-     */
-    private $commands;
-
-    /**
-     * @var CommandInterface[]
-     */
-    private $handlers = [];
-
-    /**
-     * @var ArgumentParserInterface
-     */
-    private $argumentParser;
-
-    public function __construct(ArgumentParserInterface $argumentParser)
+    public function __construct(public readonly ArgumentParserInterface $argumentParser)
     {
-        $this->argumentParser = $argumentParser;
-    }
-
-    public function getArgumentParser(): ArgumentParserInterface
-    {
-        return $this->argumentParser;
     }
 
     public function getAvailableCommands(): array
@@ -60,12 +30,8 @@ class Router
     {
         $params = [];
         if (strpos($name, ' ') !== false) {
-            list($name, $extra)=explode(' ', $name, 2);
+            list($name, $extra) = explode(' ', $name, 2);
             $params = explode(' ', $extra);
-        }
-
-        foreach (self::GLOBAL_PARAMS as $definition) {
-            $data['parameters'][] = $definition;
         }
 
         $this->commands[$name] = array_merge($data, [

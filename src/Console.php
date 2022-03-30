@@ -1,11 +1,14 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Onion\Framework\Console;
 
+use DOMDocument;
 use Onion\Framework\Console\Interfaces\ConsoleInterface;
 use Seld\CliPrompt\CliPrompt;
 
-class Console implements ConsoleInterface, \SplObserver
+class Console implements ConsoleInterface
 {
     private $stream;
     private $arguments = [];
@@ -127,47 +130,104 @@ class Console implements ConsoleInterface, \SplObserver
         string $default = ''
     ): string {
         $response = $this->prompt(
-            $message . ' ['. implode(', ', $options) . ']',
+            $message . ' [' . implode(', ', $options) . ']',
             $default
         );
 
         if (!in_array(strtolower($response), array_map('strtolower', $options))) {
-            $this->writeLine("%text:red%'{$response}' is not a valid selection");
+            trigger_error("'{$response}' is not valid for selection", E_USER_ERROR);
+
             $response = $this->choice($message, $options, $default);
         }
 
         return $response;
     }
 
+    private function parse(\DOMNode $doc, string $color = '', string $bg = ''): string
+    {
+        $message = '';
+
+        for ($i = 0; $i < $doc->childNodes->length; $i++) {
+            $child = $doc->childNodes->item($i);
+            $attributes = [];
+            if ($child->hasAttributes()) {
+                foreach ($child->attributes as $attribute) {
+                    /** @var \DOMAttr $attribute */
+                    $attributes[$attribute->name] = $attribute->value;
+                }
+            }
+
+            $key = '';
+            if (isset($attributes['decoration'])) {
+                $key .= $attributes['decoration'] . '-';
+            }
+
+            if (isset($attributes['light'])) {
+                $key .= 'light-';
+            }
+
+            if (isset($attributes['text'])) {
+                $key .= $attributes['text'];
+            }
+
+            switch ($child->nodeType) {
+                case XML_TEXT_NODE:
+                    $message .= sprintf(
+                        '%s%s%s',
+                        $color,
+                        $bg,
+                        $child->nodeValue,
+                    );
+                    break;
+                case XML_ELEMENT_NODE:
+                    $message .= match ($child->nodeName) {
+                        'color' => sprintf('%s%s', $this->parse($child, self::TEXT_COLORS[$key] ?? '', self::BACKGROUND_COLORS[$attributes['bg'] ?? 'none']), self::COLOR_TERMINATOR),
+                        default => (new DOMDocument())->saveHTML($child),
+                    };
+                    break;
+            }
+        }
+
+        return $message;
+    }
     public function normalizeText(string $message): string
     {
-        if (strpos($message, '%text') !== false) {
-            preg_match_all('#%text:([a-zA-Z-]+)%#i', $message, $matches);
-            $message = strtr($message, array_combine($matches[0], array_map(function ($value) {
-                return self::TEXT_COLORS[$value];
-            }, $matches[1])));
-        }
+        $doc = new DOMDocument();
 
-        if (strpos($message, '%bg') !== false) {
-            preg_match_all('#%bg:([a-zA-Z-]+)%#i', $message, $matches);
-            $message = strtr($message, array_combine($matches[0], array_map(function ($value) {
-                return self::BACKGROUND_COLORS[$value];
-            }, $matches[1])));
-        }
+        $doc->loadXML('<root>' . str_replace(
+            ['<', '&lt;color', '&lt;/color'],
+            ['&lt;', '<color', '</color'],
+            // ! Handle unsupported characters inside user-provided text,
+            // ! prevents issues in handling of color tags as XML
+            preg_replace_callback(
+                '/(\p{C})/u',
+                fn (array $chars) => match ($chars[0]) {
+                    "\t" => "\t",
+                    "\n" => "\n",
+                    "\r" => "\r",
+                    default => '',
+                },
+                $message,
+            )
+        ) . '</root>', LIBXML_PARSEHUGE | LIBXML_COMPACT);
 
-        return strtr(
-            "$message%end%",
-            ['%end%' => self::COLOR_TERMINATOR]
-        );
+        return $this->parse($doc->childNodes->item(0));
     }
 
-    public function clearMessage(string $message)
+    public function copy(mixed $resource): int
+    {
+        $size = 0;
+        fseek($resource, 0);
+        while (!feof($resource)) {
+            $r = (string) fread($resource, 1024);
+            $size += $this->write($r);
+        }
+
+        return $size;
+    }
+
+    private function clearMessage(string $message): string
     {
         return preg_replace("#(\033\[[0-9;]*m)#i", '', $message);
-    }
-
-    public function update(\SplSubject $subject)
-    {
-        $subject->display($this);
     }
 }
