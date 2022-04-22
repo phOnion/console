@@ -31,7 +31,7 @@ class Box extends Buffer
     public function addMessage(string $message): void
     {
         $lineOffset = (strlen($this->vertical) * 2);
-        $lines = explode("\n", wordwrap($message, $this->length - $lineOffset));
+        $lines = explode("\n", wordwrap($message, $this->length - $lineOffset, cut_long_words: true));
 
         foreach ($lines as $line) {
             $this->addLine(sprintf(
