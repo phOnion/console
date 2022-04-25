@@ -158,7 +158,7 @@ class Console implements ConsoleInterface
 
         fwrite($this->stream, $message);
 
-        return strlen($this->clearMessage($message));
+        return $this->strlen($this->clearMessage($message));
     }
 
     public function writeLine(string $message): int
@@ -272,18 +272,22 @@ class Console implements ConsoleInterface
             // ! Handle unsupported characters inside user-provided text,
             // ! prevents issues in handling of color tags as XML
             preg_replace_callback(
-                '/(\p{C})/u',
+                '/(\p{C}|\p{So})/u',
                 fn (array $chars) => match ($chars[0]) {
                     "\t" => "\t",
                     "\n" => "\n",
                     "\r" => "\r",
-                    default => '',
+                    default => sprintf('{CHAR:%d}', $this->ord($chars[0])),
                 },
                 $message,
             )
         ) . '</root>', LIBXML_PARSEHUGE | LIBXML_COMPACT);
 
-        return $this->parse($doc->childNodes->item(0));
+        return preg_replace_callback(
+            '/\{CHAR:(\d+)\}/',
+            fn ($ch) => $this->chr((int) $ch[1]),
+            $this->parse($doc->childNodes->item(0))
+        );
     }
 
     public function copy(mixed $resource): int
@@ -301,5 +305,21 @@ class Console implements ConsoleInterface
     private function clearMessage(string $message): string
     {
         return preg_replace("#(\033\[[0-9;]*m)#i", '', $message);
+    }
+
+
+    private function strlen(string $string): int
+    {
+        return function_exists('mb_strlen') ? mb_strlen($string) : strlen($string);
+    }
+
+    private function ord(string $chr): int
+    {
+        return function_exists('mb_ord') ? mb_ord($chr) : ord($chr);
+    }
+
+    private function chr(int $chr): string
+    {
+        return function_exists('mb_chr') ? mb_chr($chr) : chr($chr);
     }
 }
