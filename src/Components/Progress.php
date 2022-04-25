@@ -11,29 +11,26 @@ class Progress implements ComponentInterface
 {
     private int $progress = 1;
 
-    private string $placeholder;
-    private string $filler;
+    private readonly float $bar;
+    private array $ticks = [];
 
-    private $bar;
-    private $ticks = 0;
+    private int $lastTick = 0;
 
-    private $lastOutputLength = 0;
-
-    private $format = '[{buffer}] ({progress}/{steps})';
+    private $format = '{complete}{cursor}{placeholder} {progress}% ({current}/{total})';
 
     public function __construct(
         private readonly int $length,
         private readonly int $steps,
-        $separators = ['-', '#']
+        private readonly string $placeholder = " ",
+        private readonly string $filler = "<color bg='green'> </color>",
+        private readonly string|Animation $cursor = "<color text='green'>\u{e0b0}</color>"
     ) {
-        $this->length = $length;
-        $this->steps = $steps;
+        $this->bar = round($steps / $this->length, 2);
+    }
 
-        if (count($separators) < 2) {
-            throw new \InvalidArgumentException('Number of separators must be 2 (placeholder, filler)');
-        }
-        list($this->placeholder, $this->filler) = $separators;
-        $this->bar = round($steps / $length, 1);
+    private function strlen(string $string): int
+    {
+        return function_exists('mb_strlen') ? mb_strlen($string) : strlen($string);
     }
 
     /**
@@ -51,6 +48,12 @@ class Progress implements ComponentInterface
 
     public function update(int $progress)
     {
+        if ($this->lastTick > 0) {
+            $this->ticks[] = time() - $this->lastTick;
+        }
+
+        $this->lastTick = time();
+
         if ($this->progress !== $this->steps) {
             $this->progress = $progress;
         }
@@ -58,32 +61,59 @@ class Progress implements ComponentInterface
 
     public function increment(int $progress)
     {
+        if ($this->lastTick > 0) {
+            $this->ticks[] = time() - $this->lastTick;
+        }
+
+        $this->lastTick = time();
+
         if ($this->progress !== $this->steps) {
             $this->progress += $progress;
         }
     }
 
+    public function advance(): void
+    {
+        $this->increment(1);
+    }
+
     public function flush(ConsoleInterface $console): void
     {
-        $this->ticks = $this->progress / $this->bar;
-        $buffer = str_repeat($this->filler, (int) $this->ticks);
-        if ($this->progress === round($this->steps, 0)) {
-            $this->ticks++;
+        $inProgress = $this->progress !== $this->steps;
+        $ticks = (int) floor($this->progress / $this->bar) - (int) $inProgress;
+        $fills = (int) ceil(($this->steps - $this->progress) / $this->bar);
+
+        $average = array_sum($this->ticks) / (count($this->ticks) ?: 1) ?: 1;
+        $remaining = $average > 0 ? ($this->steps - $this->progress) * $average : 0;
+
+        $this->overwrite($console, strtr($this->format, [
+            '{complete}' => str_repeat($this->filler, $ticks),
+            '{placeholder}' => str_repeat($this->placeholder, $fills),
+            '{cursor}' => $inProgress ? ($this->cursor instanceof Animation ? $this->cursor->getContents() : $this->cursor) : '',
+            '{current}' => str_pad((string) $this->progress, $this->strlen((string) $this->steps), ' ', STR_PAD_LEFT),
+            '{total}' => $this->steps,
+            '{progress}' => number_format(($this->progress / $this->steps) * 100, 0),
+            '{eta}' => $inProgress ? $this->normalizeSeconds($remaining) : 'DONE',
+        ]));
+    }
+
+    public function overwrite(ConsoleInterface $console, string $output): void
+    {
+        $console->write("\x1b[1G\x1b[2K{$output}");
+    }
+
+    private function normalizeSeconds(float $time): string
+    {
+        if ($time < 1) {
+            return '<1sec';
         }
 
-        $buffer .= '>';
-        $buffer .= str_repeat(
-            $this->placeholder,
-            (int) ($this->length - strlen($buffer) > 0 ? $this->length - strlen($buffer) : 0)
-        );
+        $hours = floor($time / 3600);
+        $minutes = floor(($time / 60)) % 60;
+        $seconds = floor($time) % 60;
 
-        $output = strtr($this->format, [
-            '{buffer}' => substr($buffer, 0, $this->length),
-            '{progress}' => str_pad((string) $this->progress, strlen((string) $this->steps), ' ', STR_PAD_LEFT),
-            '{steps}' => $this->steps
-        ]);
-
-        $console->write(str_repeat(chr(8), $this->lastOutputLength));
-        $this->lastOutputLength = $console->write($output);
+        return ($hours > 0 ? "{$hours}hrs " : '') .
+            ($minutes > 0 ? "{$minutes}min " : '') .
+            ($seconds > 0 ? "{$seconds}sec" : '');
     }
 }
