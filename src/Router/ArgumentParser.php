@@ -22,6 +22,8 @@ class ArgumentParser implements ArgumentParserInterface
 
         foreach ($parameters as $parameter) {
             $aliases = array_map('trim', explode('|', $parameter['name']));
+            $name = trim($aliases[0], '-');
+
             foreach ($aliases as $alias) {
                 $i = array_search($alias, $arguments);
                 if ($i === false) {
@@ -50,34 +52,29 @@ class ArgumentParser implements ArgumentParserInterface
                     continue;
                 }
             }
-        }
 
-        foreach ($parameters as $meta) {
-            $parameter = trim(explode('|', $meta['name'])[0]);
-            if (($meta['required'] ?? false) && !isset($result[$parameter])) {
+            if (($parameter['required'] ?? false) && !isset($result[$name])) {
                 throw new \BadFunctionCallException(
-                    "Missing required parameter '{$parameter}'"
+                    "Missing required parameter '{$name}'"
                 );
             }
 
-            if (isset($meta['default']) && !isset($result[$parameter])) {
-                $result[$parameter] = $meta['default'];
+            if (isset($parameter['default']) && !isset($result[$name])) {
+                $result[$name] = $parameter['default'];
 
                 continue;
             }
 
-            if (!isset($meta['type'], $result[$parameter]) || preg_match(static::TYPE_MAP[$meta['type']], $result[$parameter]) !== false) {
+            if (!isset($result[$name]) || preg_match(static::TYPE_MAP[$parameter['type']], (string) $result[$name]) !== false) {
                 continue;
             }
 
-            if (!filter_var($result[$parameter], static::TYPE_MAP[$meta['type']])) {
+            if (!filter_var($result[$name], static::TYPE_MAP[$parameter['type']])) {
                 throw new \InvalidArgumentException(
-                    "The value '{$result[$parameter]}' for {$parameter} must be of type {$meta['type']}"
+                    "The value '{$result[$name]}' for {$parameter} must be of type {$parameter['type']}"
                 );
             }
         }
-
-        $arguments = array_values($arguments);
 
         return $result;
     }
