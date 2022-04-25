@@ -302,11 +302,25 @@ class Console implements ConsoleInterface
         return $size;
     }
 
+    public function overwrite(string $content = ''): void
+    {
+        $this->write("\x1b[1G\x1b[2K{$content}");
+    }
+
+    public function hideCursor(): void
+    {
+        $this->write("\x1b[?25l");
+    }
+
+    public function showCursor(): void
+    {
+        $this->write("\x1b[?25h\x1b[?0c");
+    }
+
     private function clearMessage(string $message): string
     {
         return preg_replace("#(\033\[[0-9;]*m)#i", '', $message);
     }
-
 
     private function strlen(string $string): int
     {
