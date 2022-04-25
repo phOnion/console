@@ -18,12 +18,24 @@ class Buffer implements ComponentInterface
         $this->content = fopen('php://temp', 'r+b');
     }
 
-    public function addLine(string $line): bool
+    public function clear()
     {
-        $size = fwrite($this->content, $line . "\n");
+        $this->size = 0;
+        fseek($this->content, 0);
+        ftruncate($this->content, 0);
+    }
+
+    public function add(string $text): bool
+    {
+        $size = fwrite($this->content, $text);
         $this->size += $size;
 
-        return $size === strlen($line);
+        return $size === strlen($text);
+    }
+
+    public function addLine(string $line): bool
+    {
+        return $this->add("{$line}\n");
     }
 
     public function getSize(): int
