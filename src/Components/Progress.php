@@ -87,8 +87,8 @@ class Progress implements ComponentInterface
         $remaining = $average > 0 ? ($this->steps - $this->progress) * $average : 0;
 
         $console->overwrite(strtr($this->format, [
-            '{complete}' => str_repeat($this->filler, $ticks),
-            '{placeholder}' => str_repeat($this->placeholder, $fills),
+            '{complete}' => str_repeat($this->filler, $ticks < 0 ? 0 : $ticks),
+            '{placeholder}' => str_repeat($this->placeholder, $fills < 0 ? 0 : $fills),
             '{cursor}' => $inProgress ? ($this->cursor instanceof Animation ? $this->cursor->getContents() : $this->cursor) : '',
             '{current}' => str_pad((string) $this->progress, $this->strlen((string) $this->steps), ' ', STR_PAD_LEFT),
             '{total}' => $this->steps,
