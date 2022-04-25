@@ -86,7 +86,7 @@ class Progress implements ComponentInterface
         $average = array_sum($this->ticks) / (count($this->ticks) ?: 1) ?: 1;
         $remaining = $average > 0 ? ($this->steps - $this->progress) * $average : 0;
 
-        $this->overwrite($console, strtr($this->format, [
+        $console->overwrite(strtr($this->format, [
             '{complete}' => str_repeat($this->filler, $ticks),
             '{placeholder}' => str_repeat($this->placeholder, $fills),
             '{cursor}' => $inProgress ? ($this->cursor instanceof Animation ? $this->cursor->getContents() : $this->cursor) : '',
@@ -95,11 +95,6 @@ class Progress implements ComponentInterface
             '{progress}' => number_format(($this->progress / $this->steps) * 100, 0),
             '{eta}' => $inProgress ? $this->normalizeSeconds($remaining) : 'DONE',
         ]));
-    }
-
-    public function overwrite(ConsoleInterface $console, string $output): void
-    {
-        $console->write("\x1b[1G\x1b[2K{$output}");
     }
 
     private function normalizeSeconds(float $time): string
