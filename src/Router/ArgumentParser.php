@@ -37,9 +37,7 @@ class ArgumentParser implements ArgumentParserInterface
                     $result[$aliases[0]] = $value;
                     unset($arguments[$i]);
                     continue;
-                }
-
-                if ($argument === $alias) {
+                } else if ($argument === $alias) {
                     $value = true;
                     $type = $parameter['type'] ?? '';
                     unset($arguments[$i]);
