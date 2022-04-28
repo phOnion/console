@@ -14,6 +14,7 @@ class ArgumentParser implements ArgumentParserInterface
         'float' => '/^(([-+])?[.,]\b(\d+)(?:[Ee]([+-])?(\d+)?)?\b)|(?:([+-])?\b(\d+)(?:[.,]?(\d+))?(?:[Ee]([+-])?(\d+)?)?\b)$/',
         'double' => '/^(([-+])?[.,]\b(\d+)(?:[Ee]([+-])?(\d+)?)?\b)|(?:([+-])?\b(\d+)(?:[.,]?(\d+))?(?:[Ee]([+-])?(\d+)?)?\b)$/',
         'bool' => '/^(?:true|yes|1|on|off|0|no|false)$/',
+        'string' => '/^(.*)$/',
     ];
 
     public function parse(array &$arguments, array $parameters = []): array
