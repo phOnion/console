@@ -26,7 +26,7 @@ class ArgumentParser implements ArgumentParserInterface
             $name = trim($aliases[0], '-');
 
             foreach ($aliases as $alias) {
-                $i = array_search($alias, $arguments);
+                $i = array_search(current(array_filter($arguments, fn ($arg) => stripos($arg, $alias) === 0)) ?: '', $arguments);
                 if ($i === false) {
                     continue;
                 }
@@ -34,7 +34,7 @@ class ArgumentParser implements ArgumentParserInterface
                 $argument = $arguments[$i];
                 if (stripos($argument, "{$alias}=") === 0) {
                     [$p, $value] = explode('=', $argument, 2);
-                    $result[$aliases[0]] = $value;
+                    $result[$name] = $value;
                     unset($arguments[$i]);
                     continue;
                 } else if ($argument === $alias) {
@@ -47,7 +47,7 @@ class ArgumentParser implements ArgumentParserInterface
                         unset($arguments[$i + 1]);
                     }
 
-                    $result[trim($aliases[0], '-')] = $value;
+                    $result[$name] = $value;
                     continue;
                 }
             }
