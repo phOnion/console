@@ -191,7 +191,7 @@ class Console implements ConsoleInterface
         string $message,
         ?Confirmation $default = null
     ): bool {
-        $response = $this->choice($message, [array_map(fn (Confirmation $case) => $case->value, Confirmation::cases())], $default?->value ?? '');
+        $response = $this->choice($message, array_map(fn (Confirmation $case) => $case->value, Confirmation::cases()), $default?->value ?? '');
 
         return (strtolower($response) === 'y');
     }
