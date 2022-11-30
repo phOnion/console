@@ -5,7 +5,9 @@
     "roave/security-advisories": "dev-master",
     "seld/signal-handler": "^1.1",
     "seld/cli-prompt": "^1.0",
-    "onion/interfaces": "@dev"
+    "onion/interfaces": "@dev",
+    "onion/framework": "@dev",
+    "onion/common": "@dev"
   },
   "autoload": {
     "psr-4": {
