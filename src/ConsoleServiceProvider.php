@@ -28,8 +28,12 @@ class ConsoleServiceProvider implements BootableServiceProviderInterface
         $container->extend(Router::class, function (Router $r, ContainerInterface $c) {
             foreach ($c->tagged('command') as $command) {
                 $reflection = new ReflectionObject($command);
+                $attributes = $reflection->getAttributes(Command::class, ReflectionAttribute::IS_INSTANCEOF);
+
+                if (empty($attributes)) continue;
+
                 /** @var ?Command $cmd */
-                $cmd = current($reflection->getAttributes(Command::class, ReflectionAttribute::IS_INSTANCEOF))?->newInstance();
+                $cmd = current($attributes)?->newInstance();
                 if (!$cmd) continue;
 
                 $r->addCommand($cmd->command, $command, [
